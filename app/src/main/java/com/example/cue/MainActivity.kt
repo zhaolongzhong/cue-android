@@ -24,15 +24,20 @@ import com.example.cue.auth.ui.SignUpScreen
 import com.example.cue.openai.OpenAIChatScreen
 import com.example.cue.settings.SettingsScreen
 import com.example.cue.ui.theme.CueTheme
+import com.example.cue.ui.theme.ThemeController
 import dagger.hilt.android.AndroidEntryPoint
+import jakarta.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject
+    lateinit var themeController: ThemeController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            CueTheme {
+            CueTheme(themeController = themeController) {
                 val navController = rememberNavController()
 
                 Scaffold(
@@ -102,6 +107,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("settings") {
                             SettingsScreen(
+                                onNavigateToApiKeys = {},
                                 onLogout = {
                                     navController.navigate("login") {
                                         popUpTo(0) { inclusive = true }

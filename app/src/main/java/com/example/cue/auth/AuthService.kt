@@ -96,7 +96,7 @@ class AuthService @Inject constructor(
         _isGeneratingToken.value = true
         return try {
             val response = networkClient.post<TokenResponse>(
-                "/assistant/token",
+                "/auth/token",
                 emptyMap(),
                 TokenResponse::class.java,
             )

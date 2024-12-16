@@ -3,6 +3,7 @@ agp = "8.2.2"
 json = "20240205"
 kotlin = "2.1.0"
 coreKtx = "1.12.0"
+datastore = "1.1.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
@@ -28,6 +29,17 @@ androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lif
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-datastore = { group = "androidx.datastore", name = "datastore-android", version.ref = "datastore" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastore" }
+androidx-datastore-core-okio-jvm = { group = "androidx.datastore", name = "datastore-core-okio-jvm", version.ref = "datastore" }
+androidx-datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastore" }
+androidx-datastore-preferences-android = { group = "androidx.datastore", name = "datastore-preferences-android", version.ref = "datastore" }
+androidx-datastore-preferences-core-jvm = { group = "androidx.datastore", name = "datastore-preferences-core-jvm", version.ref = "datastore" }
+androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastore" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
+androidx-datastore-base = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
@@ -41,7 +53,6 @@ androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navig
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
-moshi = { group = "com.squareup.moshi", name = "moshi", version.ref = "moshi" }
 moshi-kotlin = { group = "com.squareup.moshi", name = "moshi-kotlin", version.ref = "moshi" }
 moshi-kotlin-codegen = { group = "com.squareup.moshi", name = "moshi-kotlin-codegen", version.ref = "moshi" }
 

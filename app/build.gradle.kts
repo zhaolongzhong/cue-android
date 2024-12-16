@@ -75,8 +75,21 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.compose.material.iconsExtended)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+
+    // DataStore
+    implementation(libs.androidx.datastore)
+    implementation(libs.androidx.datastore.core.android)
+    implementation(libs.androidx.datastore.core.okio.jvm)
+    implementation(libs.androidx.datastore.core.okio)
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.androidx.datastore.preferences.android)
+    implementation(libs.androidx.datastore.preferences.core.jvm)
+    implementation(libs.androidx.datastore.preferences.core)
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.base)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -100,10 +113,6 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-}
-
-kapt {
-    correctErrorTypes = true
 }
 
 spotless {
