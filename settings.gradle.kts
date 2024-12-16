@@ -21,3 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Cue"
 include(":app")
+include(":openai")
