@@ -1,0 +1,55 @@
+name: Release Android
+
+on:
+  push:
+    branches: ["release/*"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Determine version
+        id: version
+        run: |
+          # Extract version from branch name (e.g., release/1.2.3)
+          VERSION=$(echo ${{ github.ref_name }} | sed 's/release\///')
+          echo "version=$VERSION" >> $GITHUB_ENV
+          # Get latest version code from Play Store and increment
+          VERSION_CODE=$(($(date +%s)/60))  # Using timestamp for version code
+          echo "version_code=$VERSION_CODE" >> $GITHUB_ENV
+
+      - name: Setup Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/upload-keystore.jks
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> keystore.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> keystore.properties
+          echo "keyAlias=upload" >> keystore.properties
+          echo "storeFile=upload-keystore.jks" >> keystore.properties
+
+      - name: Build Release Bundle
+        run: |
+          ./gradlew bundleRelease
+
+      - name: Deploy to Play Store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_CONFIG_JSON }}
+          packageName: ai.cue.android
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: draft
+
+      - name: Create Release Tag
+        run: |
+          git tag v${{ env.version }}
+          git push origin v${{ env.version }}
