@@ -1,119 +1,116 @@
 package com.example.cue
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.example.cue.auth.ui.LoginScreen
+import com.example.cue.auth.ui.SignUpScreen
+import com.example.cue.settings.SettingsScreen
 import com.example.cue.ui.theme.CueTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             CueTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    OpenAIScreen(
+                val navController = rememberNavController()
+
+                Scaffold(
+                    modifier = Modifier.fillMaxSize(),
+                    bottomBar = {
+                        // Only show bottom navigation when user is authenticated
+                        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+                        if (currentRoute in listOf("home", "settings")) {
+                            NavigationBar {
+                                NavigationBarItem(
+                                    icon = { Icon(Icons.Default.Home, contentDescription = "Chat") },
+                                    label = { Text("Chat") },
+                                    selected = currentRoute == "home",
+                                    onClick = {
+                                        navController.navigate("home") {
+                                            popUpTo("home") { inclusive = true }
+                                        }
+                                    },
+                                )
+                                NavigationBarItem(
+                                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                                    label = { Text("Settings") },
+                                    selected = currentRoute == "settings",
+                                    onClick = {
+                                        navController.navigate("settings") {
+                                            popUpTo("home")
+                                        }
+                                    },
+                                )
+                            }
+                        }
+                    },
+                ) { innerPadding ->
+                    NavHost(
+                        navController = navController,
+                        startDestination = "login",
                         modifier = Modifier.padding(innerPadding),
-                    )
-                }
-            }
-        }
-    }
-}
-
-val TAG = "OpenAIScreen"
-
-@Composable
-fun OpenAIScreen(modifier: Modifier = Modifier) {
-    var prompt by remember { mutableStateOf("") }
-    var response by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
-
-    val openAIClient = remember {
-        OpenAIClient(BuildConfig.OPENAI_API_KEY)
-    }
-
-    Column(
-        modifier = modifier.padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        OutlinedTextField(
-            value = prompt,
-            onValueChange = {
-                prompt = it
-                Log.d(TAG, "Prompt updated: $it")
-            },
-            label = { Text("Enter your prompt") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-        )
-
-        Button(
-            onClick = {
-                coroutineScope.launch {
-                    Log.d(TAG, "Button clicked, starting API call")
-                    isLoading = true
-                    try {
-                        Log.d(TAG, "Making API call with prompt: $prompt")
-                        response = withContext(Dispatchers.IO) {
-                            openAIClient.createCompletion(
-                                prompt = prompt,
-                                maxTokens = 100,
+                    ) {
+                        composable("login") {
+                            LoginScreen(
+                                onNavigateToSignUp = {
+                                    navController.navigate("signup")
+                                },
+                                onLoginSuccess = {
+                                    navController.navigate("home") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                },
                             )
                         }
-                        Log.d(TAG, "API call successful, response: $response")
-                    } catch (e: Exception) {
-                        Log.e(TAG, "API call failed: ${e.message}", e)
-
-                        response = "Error: ${e.message}"
-                    } finally {
-                        isLoading = false
-                        Log.d(TAG, "API call completed, loading state reset")
+                        composable("signup") {
+                            SignUpScreen(
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                },
+                                onSignUpSuccess = {
+                                    navController.navigate("home") {
+                                        popUpTo("signup") { inclusive = true }
+                                    }
+                                },
+                            )
+                        }
+                        composable("home") {
+                            OpenAIScreen(
+                                modifier = Modifier,
+                            )
+                        }
+                        composable("settings") {
+                            SettingsScreen(
+                                onLogout = {
+                                    navController.navigate("login") {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                },
+                            )
+                        }
                     }
                 }
-            },
-            enabled = prompt.isNotBlank() && !isLoading,
-            modifier = Modifier.padding(bottom = 16.dp),
-        ) {
-            Text("Get Response")
-        }
-
-        if (isLoading) {
-            CircularProgressIndicator()
-            Log.d(TAG, "Showing loading indicator")
-        }
-
-        if (response.isNotEmpty()) {
-            Text(
-                text = response,
-                modifier = Modifier.padding(top = 16.dp),
-            )
-            Log.d(TAG, "Displaying response: $response")
+            }
         }
     }
 }
