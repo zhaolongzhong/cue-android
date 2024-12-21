@@ -3,6 +3,7 @@ package com.example.cue.di
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.cue.BuildConfig
+import com.example.cue.OpenAIClient
 import com.example.cue.network.NetworkClient
 import com.example.cue.network.NetworkClientImpl
 import com.example.cue.network.NetworkError
@@ -151,5 +152,11 @@ object NetworkModule {
             baseUrl = baseUrl,
             sharedPreferences = sharedPreferences,
         )
+    }
+
+    @Provides
+    @Singleton
+    fun provideOpenAIClient(): OpenAIClient {
+        return OpenAIClient(BuildConfig.OPENAI_API_KEY)
     }
 }
