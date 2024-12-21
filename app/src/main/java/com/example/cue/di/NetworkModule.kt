@@ -3,6 +3,7 @@ package com.example.cue.di
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.cue.BuildConfig
+import com.example.cue.OpenAIClient
 import com.example.cue.network.NetworkClient
 import com.example.cue.network.NetworkClientImpl
 import com.example.cue.network.NetworkError
@@ -95,5 +96,50 @@ object NetworkModule {
             baseUrl = baseUrl,
             sharedPreferences = sharedPreferences,
         )
+    }
+
+    @Provides
+    @Singleton
+    @Named("openaiBaseUrl")
+    fun provideOpenAIBaseUrl(): String {
+        return "https://api.openai.com/v1"
+    }
+
+    @Provides
+    @Singleton
+    @Named("openaiOkHttpClient")
+    fun provideOpenAIOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer ${BuildConfig.OPENAI_API_KEY}")
+                    .build()
+                try {
+                    chain.proceed(request)
+                } catch (e: Exception) {
+                    throw NetworkError.NetworkFailure(
+                        message = "Network request failed: ${e.localizedMessage}",
+                    )
+                }
+            }
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = if (BuildConfig.DEBUG) {
+                        HttpLoggingInterceptor.Level.BODY
+                    } else {
+                        HttpLoggingInterceptor.Level.NONE
+                    }
+                },
+            )
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideOpenAIClient(): OpenAIClient {
+        return OpenAIClient(BuildConfig.OPENAI_API_KEY)
     }
 }
