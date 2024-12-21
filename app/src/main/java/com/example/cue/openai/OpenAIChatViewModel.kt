@@ -2,9 +2,6 @@ package com.example.cue.openai
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cue.BuildConfig
-import com.example.cue.network.NetworkClient
-import com.example.cue.network.NetworkError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,7 +25,7 @@ data class OpenAIChatUiState(
 
 @HiltViewModel
 class OpenAIChatViewModel @Inject constructor(
-    private val networkClient: NetworkClient,
+    private val chatService: OpenAIChatService,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(OpenAIChatUiState())
@@ -55,22 +52,9 @@ class OpenAIChatViewModel @Inject constructor(
 
         viewModelScope.launch {
             try {
-                val response = networkClient.post<OpenAIResponse>(
-                    endpoint = "chat/completions",
-                    body = mapOf(
-                        "model" to "gpt-3.5-turbo",
-                        "messages" to listOf(
-                            mapOf(
-                                "role" to "user",
-                                "content" to currentInput
-                            )
-                        )
-                    ),
-                    responseType = OpenAIResponse::class.java
-                )
-
+                val response = chatService.sendMessage(currentInput)
                 val assistantMessage = Message(
-                    content = response.choices.firstOrNull()?.message?.content ?: "No response",
+                    content = response,
                     isUser = false
                 )
 
@@ -80,7 +64,7 @@ class OpenAIChatViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
-            } catch (e: NetworkError) {
+            } catch (e: ChatError) {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -95,18 +79,3 @@ class OpenAIChatViewModel @Inject constructor(
         _uiState.update { it.copy(error = null) }
     }
 }
-
-// Data classes for OpenAI API response
-data class OpenAIResponse(
-    val id: String,
-    val choices: List<Choice>,
-)
-
-data class Choice(
-    val message: ChatMessage,
-)
-
-data class ChatMessage(
-    val role: String,
-    val content: String,
-)
