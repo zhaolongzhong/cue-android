@@ -96,4 +96,60 @@ object NetworkModule {
             sharedPreferences = sharedPreferences,
         )
     }
+
+    @Provides
+    @Singleton
+    @Named("openaiBaseUrl")
+    fun provideOpenAIBaseUrl(): String {
+        return "https://api.openai.com/v1"
+    }
+
+    @Provides
+    @Singleton
+    @Named("openaiOkHttpClient")
+    fun provideOpenAIOkHttpClient(): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor { chain ->
+                val request = chain.request().newBuilder()
+                    .addHeader("Authorization", "Bearer ${BuildConfig.OPENAI_API_KEY}")
+                    .build()
+                try {
+                    chain.proceed(request)
+                } catch (e: Exception) {
+                    throw NetworkError.NetworkFailure(
+                        message = "Network request failed: ${e.localizedMessage}",
+                    )
+                }
+            }
+            .addInterceptor(
+                HttpLoggingInterceptor().apply {
+                    level = if (BuildConfig.DEBUG) {
+                        HttpLoggingInterceptor.Level.BODY
+                    } else {
+                        HttpLoggingInterceptor.Level.NONE
+                    }
+                },
+            )
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @Named("openaiClient")
+    fun provideOpenAINetworkClient(
+        @Named("openaiOkHttpClient") okHttpClient: OkHttpClient,
+        moshi: Moshi,
+        @Named("openaiBaseUrl") baseUrl: String,
+        sharedPreferences: SharedPreferences,
+    ): NetworkClient {
+        return NetworkClientImpl(
+            okHttpClient = okHttpClient,
+            moshi = moshi,
+            baseUrl = baseUrl,
+            sharedPreferences = sharedPreferences,
+        )
+    }
 }

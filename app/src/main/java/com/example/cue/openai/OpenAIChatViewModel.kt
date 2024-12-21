@@ -50,25 +50,22 @@ class OpenAIChatViewModel @Inject constructor(
             )
         }
 
+        // Send the message with chat history
         viewModelScope.launch {
             try {
                 val response = chatService.sendMessage(currentInput)
-                val assistantMessage = Message(
-                    content = response,
-                    isUser = false
-                )
-
-                _uiState.update { 
+                val assistantMessage = Message(content = response, isUser = false)
+                _uiState.update {
                     it.copy(
                         messages = it.messages + assistantMessage,
-                        isLoading = false
+                        isLoading = false,
                     )
                 }
             } catch (e: ChatError) {
                 _uiState.update {
                     it.copy(
+                        error = e.message,
                         isLoading = false,
-                        error = e.message
                     )
                 }
             }
