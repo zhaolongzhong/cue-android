@@ -21,6 +21,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cue.auth.ui.LoginScreen
 import com.example.cue.auth.ui.SignUpScreen
+import com.example.cue.openai.OpenAIChatScreen
 import com.example.cue.settings.SettingsScreen
 import com.example.cue.ui.theme.CueTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -95,8 +96,8 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("home") {
-                            OpenAIScreen(
-                                modifier = Modifier,
+                            OpenAIChatScreen(
+                                modifier = Modifier.fillMaxSize(),
                             )
                         }
                         composable("settings") {

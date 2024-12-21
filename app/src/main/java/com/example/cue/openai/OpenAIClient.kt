@@ -1,6 +1,8 @@
-package com.example.cue
+package com.example.cue.openai
 
 import android.util.Log
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.OutputStreamWriter
@@ -65,12 +67,12 @@ class OpenAIClient(private val apiKey: String) {
         }
     }
 
-    fun createCompletion(
-        model: String = "gpt-3.5-turbo",
+    suspend fun createCompletion(
+        model: String = "gpt-4o-mini",
         prompt: String,
         maxTokens: Int = 100,
         temperature: Double = 0.7,
-    ): String {
+    ): String = withContext(Dispatchers.IO) {
         val endpoint = "$baseUrl/chat/completions"
         Log.d(TAG, "Making request to endpoint: $endpoint")
         Log.d(TAG, "Using model: $model")
@@ -138,7 +140,7 @@ class OpenAIClient(private val apiKey: String) {
                     .getJSONObject(0)
                     .getJSONObject("message")
 
-                if (message.has("tool_calls")) {
+                val result = if (message.has("tool_calls")) {
                     // Handle tool calls
                     val toolCalls = message.getJSONArray("tool_calls")
                     val results = mutableListOf<String>()
@@ -159,10 +161,12 @@ class OpenAIClient(private val apiKey: String) {
                             }
                         }
                     }
-                    return results.joinToString("\n")
+                    results.joinToString("\n")
+                } else {
+                    message.getString("content")
                 }
 
-                return message.getString("content")
+                result
             } else {
                 // Read error response
                 val errorResponse = connection.errorStream?.bufferedReader()?.use { it.readText() }
