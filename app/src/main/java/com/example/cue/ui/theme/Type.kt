@@ -32,3 +32,6 @@ val Typography = Typography(
     )
      */
 )
+
+val Typography.bodyMonospace: TextStyle
+    get() = bodyLarge.copy(fontFamily = FontFamily.Monospace)
