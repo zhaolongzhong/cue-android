@@ -7,6 +7,7 @@ import com.example.cue.network.NetworkClient
 import com.example.cue.network.NetworkClientImpl
 import com.example.cue.network.NetworkError
 import com.example.cue.openai.OpenAIClient
+import com.example.cue.settings.apikeys.ApiKeyType
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import dagger.Module
@@ -108,14 +109,21 @@ object NetworkModule {
     @Provides
     @Singleton
     @Named("openaiOkHttpClient")
-    fun provideOpenAIOkHttpClient(): OkHttpClient {
+    fun provideOpenAIOkHttpClient(sharedPreferences: SharedPreferences): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
             .writeTimeout(30, TimeUnit.SECONDS)
             .addInterceptor { chain ->
+                val apiKey = sharedPreferences.getString(ApiKeyType.OPENAI.key, "") ?: ""
+                if (apiKey.isEmpty()) {
+                    throw NetworkError.NetworkFailure(
+                        message = "OpenAI API key not found in preferences",
+                    )
+                }
+
                 val request = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer ${BuildConfig.OPENAI_API_KEY}")
+                    .addHeader("Authorization", "Bearer $apiKey")
                     .build()
                 try {
                     chain.proceed(request)
@@ -139,7 +147,8 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOpenAIClient(): OpenAIClient {
-        return OpenAIClient(BuildConfig.OPENAI_API_KEY)
+    fun provideOpenAIClient(sharedPreferences: SharedPreferences): OpenAIClient {
+        val apiKey = sharedPreferences.getString(ApiKeyType.OPENAI.key, "") ?: ""
+        return OpenAIClient(apiKey)
     }
 }

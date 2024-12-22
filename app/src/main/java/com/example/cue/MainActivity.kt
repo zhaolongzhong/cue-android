@@ -23,6 +23,7 @@ import com.example.cue.auth.ui.LoginScreen
 import com.example.cue.auth.ui.SignUpScreen
 import com.example.cue.openai.OpenAIChatScreen
 import com.example.cue.settings.SettingsScreen
+import com.example.cue.settings.apikeys.ApiKeysScreen
 import com.example.cue.ui.theme.CueTheme
 import com.example.cue.ui.theme.ThemeController
 import dagger.hilt.android.AndroidEntryPoint
@@ -107,11 +108,20 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("settings") {
                             SettingsScreen(
-                                onNavigateToApiKeys = {},
+                                onNavigateToApiKeys = {
+                                    navController.navigate("api_keys")
+                                },
                                 onLogout = {
                                     navController.navigate("login") {
                                         popUpTo(0) { inclusive = true }
                                     }
+                                },
+                            )
+                        }
+                        composable("api_keys") {
+                            ApiKeysScreen(
+                                onNavigateBack = {
+                                    navController.popBackStack()
                                 },
                             )
                         }
