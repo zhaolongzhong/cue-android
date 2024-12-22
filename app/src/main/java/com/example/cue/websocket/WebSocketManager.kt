@@ -16,6 +16,8 @@ import org.json.JSONObject
 import java.util.Date
 import java.util.UUID
 import kotlin.math.pow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 private const val TAG = "WebSocketManager"
 
@@ -44,6 +46,9 @@ class WebSocketManager(
     private var shouldReconnect = true
     private var isReconnecting = false
 
+    // Connection synchronization
+    private val connectionLock = Mutex()
+
     // Ping/Pong configuration
     private val pingInterval = 30000L // 30 seconds
     private val pongTimeout = 40000L // 40 seconds
@@ -52,26 +57,28 @@ class WebSocketManager(
     private var pongCheckJob: Job? = null
 
     fun connect() {
-        if (client != null) {
-            Log.w(TAG, "WebSocket manager is already connected")
-            return
-        }
+        scope.launch {
+            connectionLock.withLock {
+                if (client != null) {
+                    Log.w(TAG, "WebSocket manager is already connected")
+                    return@withLock
+                }
 
-        _connectionState.value = ConnectionState.Connecting
-        shouldReconnect = true
-        lastPongReceived = Date()
+                _connectionState.value = ConnectionState.Connecting
+                shouldReconnect = true
+                lastPongReceived = Date()
 
-        val headers = mapOf(
-            "Authorization" to "Bearer $accessToken",
-            "Content-Type" to "application/json",
-        )
+                val headers = mapOf(
+                    "Authorization" to "Bearer $accessToken",
+                    "Content-Type" to "application/json",
+                )
 
-        val fullUrl = "$baseUrl/$clientId"
+                val fullUrl = "$baseUrl/$clientId"
 
-        client = WebSocketClient(fullUrl, headers).also { client ->
-            scope.launch {
-                client.events.collect { event ->
-                    when (event) {
+                client = WebSocketClient(fullUrl, headers).also { client ->
+                    scope.launch {
+                        client.events.collect { event ->
+                            when (event) {
                         is WebSocketEvent.Connected -> {
                             Log.d(TAG, "WebSocket connected")
                             _connectionState.value = ConnectionState.Connected
@@ -112,41 +119,47 @@ class WebSocketManager(
     }
 
     fun disconnect() {
-        Log.d(TAG, "Disconnecting WebSocket")
-        shouldReconnect = false
-        reconnectJob?.cancel()
-        reconnectJob = null
-        cancelPingPong()
-        client?.disconnect()
-        client = null
-        _connectionState.value = ConnectionState.Disconnected
-        reconnectAttempts = 0
+        scope.launch {
+            connectionLock.withLock {
+                Log.d(TAG, "Disconnecting WebSocket")
+                shouldReconnect = false
+                reconnectJob?.cancel()
+                reconnectJob = null
+                cancelPingPong()
+                client?.disconnect()
+                client = null
+                _connectionState.value = ConnectionState.Disconnected
+                reconnectAttempts = 0
+            }
+        }
     }
 
-    fun send(message: String, recipient: String): Boolean {
-        if (_connectionState.value != ConnectionState.Connected) {
-            Log.e(
-                TAG,
-                "Attempting to send message while not connected. State: ${_connectionState.value}",
-            )
-            return false
-        }
+    suspend fun send(message: String, recipient: String): Boolean {
+        connectionLock.withLock {
+            if (_connectionState.value != ConnectionState.Connected) {
+                Log.e(
+                    TAG,
+                    "Attempting to send message while not connected. State: ${_connectionState.value}",
+                )
+                return false
+            }
 
-        val uuid = UUID.randomUUID().toString()
-        val messagePayload = JSONObject().apply {
-            put("message", message)
-            put("recipient", recipient)
-            put("websocket_request_id", uuid)
-        }
+            val uuid = UUID.randomUUID().toString()
+            val messagePayload = JSONObject().apply {
+                put("message", message)
+                put("recipient", recipient)
+                put("websocket_request_id", uuid)
+            }
 
-        val eventMessage = JSONObject().apply {
-            put("type", "user")
-            put("payload", messagePayload)
-            put("client_id", clientId)
-            put("websocket_request_id", uuid)
-        }
+            val eventMessage = JSONObject().apply {
+                put("type", "user")
+                put("payload", messagePayload)
+                put("client_id", clientId)
+                put("websocket_request_id", uuid)
+            }
 
-        return client?.send(eventMessage) ?: false
+            return client?.send(eventMessage) ?: false
+        }
     }
 
     private fun setupPingPong() {
@@ -185,7 +198,15 @@ class WebSocketManager(
     }
 
     private fun sendProtocolPing() {
-        client?.webSocket?.send("") // Empty message acts as a ping
+        client?.webSocket?.let { socket ->
+            try {
+                socket.ping(ByteString.EMPTY)
+                Log.d(TAG, "Protocol ping sent")
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to send protocol ping", e)
+                handleError(ConnectionError.ConnectionFailed("Protocol ping failed: ${e.message}"))
+            }
+        }
     }
 
     private fun handleError(error: ConnectionError) {
