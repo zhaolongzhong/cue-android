@@ -4,17 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,6 +25,7 @@ import com.example.cue.ui.theme.CueTheme
 import com.example.cue.ui.theme.ThemeController
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -40,38 +38,106 @@ class MainActivity : ComponentActivity() {
         setContent {
             CueTheme(themeController = themeController) {
                 val navController = rememberNavController()
+                val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+                val scope = rememberCoroutineScope()
+                val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        // Only show bottom navigation when user is authenticated
-                        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-                        if (currentRoute in listOf("home", "settings")) {
-                            NavigationBar {
-                                NavigationBarItem(
-                                    icon = { Icon(Icons.Default.Home, contentDescription = "Chat") },
-                                    label = { Text("Chat") },
-                                    selected = currentRoute == "home",
-                                    onClick = {
+                ModalNavigationDrawer(
+                    drawerState = drawerState,
+                    drawerContent = {
+                        ModalDrawerSheet {
+                            Spacer(Modifier.height(12.dp))
+                            Text(
+                                "Cue Assistant",
+                                modifier = Modifier.padding(16.dp),
+                                style = MaterialTheme.typography.titleLarge
+                            )
+                            Divider()
+                            NavigationDrawerItem(
+                                icon = { Icon(Icons.Default.Chat, contentDescription = null) },
+                                label = { Text("Conversations") },
+                                selected = currentRoute == "home",
+                                onClick = {
+                                    scope.launch {
+                                        drawerState.close()
                                         navController.navigate("home") {
                                             popUpTo("home") { inclusive = true }
                                         }
-                                    },
-                                )
-                                NavigationBarItem(
-                                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                                    label = { Text("Settings") },
-                                    selected = currentRoute == "settings",
-                                    onClick = {
+                                    }
+                                },
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            )
+                            NavigationDrawerItem(
+                                icon = { Icon(Icons.Default.History, contentDescription = null) },
+                                label = { Text("History") },
+                                selected = false,
+                                onClick = {
+                                    scope.launch {
+                                        drawerState.close()
+                                        // TODO: Add history navigation
+                                    }
+                                },
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            )
+                            NavigationDrawerItem(
+                                icon = { Icon(Icons.Default.Settings, contentDescription = null) },
+                                label = { Text("Settings") },
+                                selected = currentRoute == "settings",
+                                onClick = {
+                                    scope.launch {
+                                        drawerState.close()
                                         navController.navigate("settings") {
                                             popUpTo("home")
                                         }
-                                    },
+                                    }
+                                },
+                                modifier = Modifier.padding(horizontal = 12.dp)
+                            )
+                        }
+                    }
+                ) {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        topBar = {
+                            if (currentRoute in listOf("home", "settings")) {
+                                TopAppBar(
+                                    title = { Text(if (currentRoute == "home") "Chat" else "Settings") },
+                                    navigationIcon = {
+                                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                        }
+                                    }
                                 )
                             }
-                        }
-                    },
-                ) { innerPadding ->
+                        },
+                        bottomBar = {
+                            // Only show bottom navigation when user is authenticated
+                            if (currentRoute in listOf("home", "settings")) {
+                                NavigationBar {
+                                    NavigationBarItem(
+                                        icon = { Icon(Icons.Default.Home, contentDescription = "Chat") },
+                                        label = { Text("Chat") },
+                                        selected = currentRoute == "home",
+                                        onClick = {
+                                            navController.navigate("home") {
+                                                popUpTo("home") { inclusive = true }
+                                            }
+                                        },
+                                    )
+                                    NavigationBarItem(
+                                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                                        label = { Text("Settings") },
+                                        selected = currentRoute == "settings",
+                                        onClick = {
+                                            navController.navigate("settings") {
+                                                popUpTo("home")
+                                            }
+                                        },
+                                    )
+                                }
+                            }
+                        },
+                    ) { innerPadding ->
                     NavHost(
                         navController = navController,
                         startDestination = "login",
