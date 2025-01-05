@@ -37,7 +37,6 @@ fun CueNavigation(
     NavHost(
         navController = navController,
         startDestination = if (isAuthenticated) Routes.HOME else Routes.LOGIN,
-        modifier = modifier,
     ) {
         authGraph(navController)
         mainGraph(navController)

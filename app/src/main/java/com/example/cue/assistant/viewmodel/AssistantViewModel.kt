@@ -3,6 +3,7 @@ package com.example.cue.assistant.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cue.assistant.AssistantRepository
+import com.example.cue.assistant.ClientStatusService
 import com.example.cue.assistant.models.Assistant
 import com.example.cue.assistant.models.AssistantCreationParams
 import com.example.cue.assistant.models.AssistantUiState
@@ -16,6 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AssistantViewModel @Inject constructor(
     private val repository: AssistantRepository,
+    clientStatusService: ClientStatusService,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AssistantUiState>(AssistantUiState.Loading)
@@ -23,12 +25,13 @@ class AssistantViewModel @Inject constructor(
 
     private val _selectedAssistant = MutableStateFlow<Assistant?>(null)
     val selectedAssistant: StateFlow<Assistant?> = _selectedAssistant.asStateFlow()
+    val clientStatuses = clientStatusService.clientStatuses
 
     init {
         loadAssistants()
     }
 
-    fun loadAssistants() {
+    private fun loadAssistants() {
         viewModelScope.launch {
             _uiState.value = AssistantUiState.Loading
             repository.getAssistants()

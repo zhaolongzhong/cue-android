@@ -38,3 +38,12 @@ data class AssistantCreationParams(
     val tools: List<AssistantTool> = emptyList(),
     val metadata: Map<String, String>? = null,
 )
+
+@JsonClass(generateAdapter = true)
+data class ClientStatus(
+    val clientId: String,
+    val runnerId: String?,
+    val assistantId: String?,
+    val isOnline: Boolean = true,
+    val lastUpdated: Long = System.currentTimeMillis(),
+)
