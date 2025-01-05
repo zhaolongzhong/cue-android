@@ -124,7 +124,14 @@ fun OpenAIChatScreen(
 }
 
 @Composable
-private fun ChatMessage(
+fun RichTextField(
+    message: Message,
+    modifier: Modifier = Modifier,
+) {
+}
+
+@Composable
+fun ChatMessage(
     message: Message,
     modifier: Modifier = Modifier,
 ) {
