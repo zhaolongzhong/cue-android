@@ -54,7 +54,7 @@ data class MessagePayload(
     val websocketRequestId: String?,
     val metadata: Metadata?,
     @Json(name = "user_id")
-    val userId: String,
+    val userId: String?,
     @Json(name = "msg_id")
     val msgId: String?,
     val payload: Map<String, Any>?,
