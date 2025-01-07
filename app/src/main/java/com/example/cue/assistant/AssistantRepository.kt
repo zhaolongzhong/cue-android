@@ -1,0 +1,75 @@
+package com.example.cue.assistant
+
+import com.example.cue.assistant.models.Assistant
+import com.example.cue.assistant.models.AssistantCreationParams
+import com.example.cue.network.NetworkClient
+import com.example.cue.network.NetworkError
+import com.example.cue.network.delete
+import com.example.cue.network.get
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class AssistantRepository @Inject constructor(
+    private val networkClient: NetworkClient,
+    private val moshi: Moshi,
+) {
+    suspend fun getAssistants(skip: Int = 0, limit: Int = 20): Result<List<Assistant>> =
+        runCatching {
+            val jsonResponse: String = networkClient.get("/assistants?skip=$skip&limit=$limit")
+
+            val type = Types.newParameterizedType(List::class.java, Assistant::class.java)
+            val adapter = moshi.adapter<List<Assistant>>(type)
+
+            adapter.fromJson(jsonResponse)
+                ?: throw NetworkError.ParseError("Failed to parse assistants")
+        }
+
+    suspend fun getAssistant(id: String): Result<Assistant> = runCatching {
+        networkClient.get(
+            endpoint = "/assistants/$id",
+            responseType = Assistant::class.java,
+        )
+    }
+
+    suspend fun createAssistant(params: AssistantCreationParams): Result<Assistant> = runCatching {
+        networkClient.post(
+            endpoint = "/assistants",
+            body = mapOf(
+                "name" to params.name,
+                "description" to params.description,
+                "instructions" to params.instructions,
+                "model" to params.model,
+                "tools" to params.tools,
+                "metadata" to params.metadata,
+            ).filterValues { it != null },
+            responseType = Assistant::class.java,
+        )
+    }
+
+    suspend fun updateAssistant(
+        id: String,
+        params: AssistantCreationParams,
+    ): Result<Assistant> = runCatching {
+        networkClient.put(
+            endpoint = "/assistants/$id",
+            body = mapOf(
+                "name" to params.name,
+                "description" to params.description,
+                "instructions" to params.instructions,
+                "model" to params.model,
+                "tools" to params.tools,
+                "metadata" to params.metadata,
+            ).filterValues { it != null },
+            responseType = Assistant::class.java,
+        )
+    }
+
+    suspend fun deleteAssistant(id: String): Result<Unit> = runCatching {
+        networkClient.delete(
+            endpoint = "/assistants/$id",
+        )
+    }
+}

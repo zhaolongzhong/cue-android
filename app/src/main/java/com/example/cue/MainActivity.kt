@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
@@ -36,6 +36,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.cue.assistant.ui.AssistantScreen
 import com.example.cue.auth.ui.LoginScreen
 import com.example.cue.auth.ui.SignUpScreen
 import com.example.cue.openai.OpenAIChatScreen
@@ -90,13 +91,15 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.padding(horizontal = 12.dp),
                             )
                             NavigationDrawerItem(
-                                icon = { Icon(Icons.Default.History, contentDescription = null) },
-                                label = { Text("History") },
+                                icon = { Icon(Icons.Default.Person, contentDescription = null) },
+                                label = { Text("Assistants") },
                                 selected = false,
                                 onClick = {
                                     scope.launch {
                                         drawerState.close()
-                                        // TODO: Add history navigation
+                                        navController.navigate("assistants") {
+                                            popUpTo("home")
+                                        }
                                     }
                                 },
                                 modifier = Modifier.padding(horizontal = 12.dp),
@@ -121,9 +124,14 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         modifier = Modifier.fillMaxSize(),
                         topBar = {
-                            if (currentRoute in listOf("home", "settings")) {
+                            if (currentRoute != null && currentRoute in listOf(
+                                    "home",
+                                    "assistants",
+                                    "settings",
+                                )
+                            ) {
                                 TopAppBar(
-                                    title = { Text(if (currentRoute == "home") "Chat" else "Settings") },
+                                    title = { Text(currentRoute.replaceFirstChar { it.uppercase() }) },
                                     navigationIcon = {
                                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                             Icon(Icons.Default.Menu, contentDescription = "Menu")
@@ -148,6 +156,21 @@ class MainActivity : ComponentActivity() {
                                         onClick = {
                                             navController.navigate("home") {
                                                 popUpTo("home") { inclusive = true }
+                                            }
+                                        },
+                                    )
+                                    NavigationBarItem(
+                                        icon = {
+                                            Icon(
+                                                Icons.Default.Settings,
+                                                contentDescription = "Assistants",
+                                            )
+                                        },
+                                        label = { Text("Assistants") },
+                                        selected = currentRoute == "assistants",
+                                        onClick = {
+                                            navController.navigate("assistants") {
+                                                popUpTo("home")
                                             }
                                         },
                                     )
@@ -215,6 +238,9 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                 )
+                            }
+                            composable("assistants") {
+                                AssistantScreen(onAssistantClick = {})
                             }
                             composable("api_keys") {
                                 ApiKeysScreen(

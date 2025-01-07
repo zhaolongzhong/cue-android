@@ -3,9 +3,12 @@ package com.example.cue.di
 import android.content.Context
 import android.content.SharedPreferences
 import com.example.cue.BuildConfig
+import com.example.cue.network.InstantAdapter
+import com.example.cue.network.JsonValueAdapter
 import com.example.cue.network.NetworkClient
 import com.example.cue.network.NetworkClientImpl
 import com.example.cue.network.NetworkError
+import com.example.cue.network.UnitAdapter
 import com.example.cue.openai.OpenAIClient
 import com.example.cue.settings.apikeys.ApiKeyType
 import com.squareup.moshi.Moshi
@@ -37,6 +40,9 @@ object NetworkModule {
     @Singleton
     fun provideMoshi(): Moshi {
         return Moshi.Builder()
+            .add(Unit::class.java, UnitAdapter())
+            .add(JsonValueAdapter())
+            .add(InstantAdapter())
             .add(KotlinJsonAdapterFactory())
             .build()
     }

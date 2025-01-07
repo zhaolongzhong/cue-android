@@ -59,7 +59,7 @@ class NetworkClientImpl @Inject constructor(
                 .post(formBody)
                 .addHeader("Content-Type", "application/x-www-form-urlencoded")
                 .build(),
-            responseType = responseType,
+            clazz = responseType,
         )
     }
 
@@ -73,7 +73,7 @@ class NetworkClientImpl @Inject constructor(
                 .get()
                 .addAuthHeaderIfNeeded()
                 .build(),
-            responseType = responseType,
+            clazz = responseType,
         )
     }
 
@@ -92,7 +92,7 @@ class NetworkClientImpl @Inject constructor(
                 .addHeader("Content-Type", "application/json")
                 .addAuthHeaderIfNeeded()
                 .build(),
-            responseType = responseType,
+            clazz = responseType,
         )
     }
 
@@ -111,7 +111,7 @@ class NetworkClientImpl @Inject constructor(
                 .addHeader("Content-Type", "application/json")
                 .addAuthHeaderIfNeeded()
                 .build(),
-            responseType = responseType,
+            clazz = responseType,
         )
     }
 
@@ -125,35 +125,33 @@ class NetworkClientImpl @Inject constructor(
                 .delete()
                 .addAuthHeaderIfNeeded()
                 .build(),
-            responseType = responseType,
+            clazz = responseType,
         )
     }
 
-    private suspend fun <T> executeRequest(
-        request: Request,
-        responseType: Class<T>,
-    ): T {
-        return try {
-            val response = okHttpClient.newCall(request).execute()
-
-            if (!response.isSuccessful) {
-                when (response.code) {
-                    401 -> throw NetworkError.Unauthorized()
-                    else -> throw NetworkError.HttpError(
-                        code = response.code,
-                        message = response.message,
-                    )
+    private suspend fun <T> executeRequest(request: Request, clazz: Class<T>): T {
+        try {
+            okHttpClient.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    when (response.code) {
+                        401 -> throw NetworkError.Unauthorized()
+                        else -> throw NetworkError.HttpError(response.code, response.message)
+                    }
                 }
-            }
+                val responseBody = response.body?.string()
+                    ?: throw NetworkError.ParseError("Empty response body")
 
-            val responseBody = response.body?.string()
-                ?: throw NetworkError.ParseError("Empty response body")
+                if (clazz == String::class.java) {
+                    @Suppress("UNCHECKED_CAST")
+                    return responseBody as T
+                }
 
-            try {
-                moshi.adapter(responseType).fromJson(responseBody)
-                    ?: throw NetworkError.ParseError("Failed to parse response")
-            } catch (e: Exception) {
-                throw NetworkError.ParseError("Failed to parse response: ${e.message}")
+                return try {
+                    moshi.adapter(clazz).fromJson(responseBody)
+                        ?: throw NetworkError.ParseError("Failed to parse response")
+                } catch (e: Exception) {
+                    throw NetworkError.ParseError("Failed to parse response: ${e.message}")
+                }
             }
         } catch (e: Exception) {
             throw when (e) {
