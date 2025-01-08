@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,9 +37,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+<<<<<<< Updated upstream
 import com.example.cue.assistant.ui.AssistantScreen
+=======
+import androidx.navigation.navArgument
+import androidx.navigation.NavType
+>>>>>>> Stashed changes
 import com.example.cue.auth.ui.LoginScreen
 import com.example.cue.auth.ui.SignUpScreen
+import com.example.cue.assistant.ui.AssistantDetailScreen
+import com.example.cue.assistant.ui.AssistantListScreen
 import com.example.cue.openai.OpenAIChatScreen
 import com.example.cue.settings.SettingsScreen
 import com.example.cue.settings.apikeys.ApiKeysScreen
@@ -91,9 +99,15 @@ class MainActivity : ComponentActivity() {
                                 modifier = Modifier.padding(horizontal = 12.dp),
                             )
                             NavigationDrawerItem(
+<<<<<<< Updated upstream
                                 icon = { Icon(Icons.Default.Person, contentDescription = null) },
                                 label = { Text("Assistants") },
                                 selected = false,
+=======
+                                icon = { Icon(Icons.Default.SmartToy, contentDescription = null) },
+                                label = { Text("Assistants") },
+                                selected = currentRoute == "assistants" || currentRoute?.startsWith("assistant_detail/") == true,
+>>>>>>> Stashed changes
                                 onClick = {
                                     scope.launch {
                                         drawerState.close()
@@ -247,6 +261,31 @@ class MainActivity : ComponentActivity() {
                                     onNavigateBack = {
                                         navController.popBackStack()
                                     },
+                                )
+                            }
+                            composable("assistants") {
+                                AssistantListScreen(
+                                    onAssistantClick = { assistantId ->
+                                        navController.navigate("assistant_detail/$assistantId")
+                                    },
+                                    onCreateAssistant = {
+                                        // TODO: Implement assistant creation
+                                        // navController.navigate("create_assistant")
+                                    }
+                                )
+                            }
+                            composable(
+                                route = "assistant_detail/{assistantId}",
+                                arguments = listOf(
+                                    navArgument("assistantId") { type = NavType.StringType }
+                                )
+                            ) { backStackEntry ->
+                                val assistantId = backStackEntry.arguments?.getString("assistantId") ?: return@composable
+                                AssistantDetailScreen(
+                                    assistantId = assistantId,
+                                    onNavigateBack = {
+                                        navController.popBackStack()
+                                    }
                                 )
                             }
                         }
