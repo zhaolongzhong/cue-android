@@ -37,7 +37,7 @@ class AuthService @Inject constructor(
     suspend fun login(email: String, password: String): String {
         return try {
             val response = networkClient.postFormUrlEncoded<TokenResponse>(
-                "/login/access-token",
+                "/accounts/login",
                 mapOf(
                     "grant_type" to "password",
                     "username" to email,
@@ -69,7 +69,7 @@ class AuthService @Inject constructor(
         try {
             // Make API call to create user
             networkClient.post<User>(
-                "/auth/signup",
+                "/accounts/signup",
                 mapOf(
                     "email" to email,
                     "password" to password,
@@ -92,27 +92,10 @@ class AuthService @Inject constructor(
         }
     }
 
-    suspend fun generateToken(): String {
-        _isGeneratingToken.value = true
-        return try {
-            val response = networkClient.post<TokenResponse>(
-                "/auth/token",
-                emptyMap(),
-                TokenResponse::class.java,
-            )
-            response.accessToken
-        } catch (e: Exception) {
-            Log.e(TAG, "Token generation error", e)
-            throw AuthError.TokenGenerationFailed
-        } finally {
-            _isGeneratingToken.value = false
-        }
-    }
-
     suspend fun fetchUserProfile(): User? {
         return try {
             val user = networkClient.get<User>(
-                "/users/me",
+                "/accounts/me",
                 User::class.java,
             )
             Log.d(TAG, "fetchUserProfile userid: ${user.email}")
@@ -131,7 +114,7 @@ class AuthService @Inject constructor(
         _currentUser.value = null
     }
 
-    fun getAccessToken(): String? {
+    private fun getAccessToken(): String? {
         return sharedPreferences.getString(ACCESS_TOKEN_KEY, null)
     }
 

@@ -80,28 +80,6 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun generateAccessToken() {
-        viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
-            try {
-                val token = authService.generateToken()
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        accessToken = token,
-                    )
-                }
-            } catch (e: Exception) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e.message ?: "Failed to generate access token",
-                    )
-                }
-            }
-        }
-    }
-
     fun clearAccessToken() {
         _uiState.update { it.copy(accessToken = null) }
     }

@@ -61,7 +61,6 @@ fun TokenGenerationView(viewModel: SettingsViewModel) {
                 TextButton(
                     onClick = {
                         showGenerateDialog = false
-                        viewModel.generateAccessToken()
                     },
                 ) {
                     Text("Generate")
