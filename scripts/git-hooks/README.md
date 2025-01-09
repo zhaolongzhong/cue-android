@@ -28,17 +28,7 @@ The pre-commit hook enforces:
    - test/suite-name (for testing changes)
    - chore/task-name (for maintenance tasks)
 
-3. Commit Message Format
-   Enforces conventional commits format:
-   - feat: new feature
-   - fix: bug fix
-   - docs: documentation changes
-   - style: formatting, layout, etc
-   - refactor: code restructuring
-   - test: adding unit/UI tests
-   - chore: maintenance tasks
-
-4. ktlint Integration
+3ktlint Integration
    - Automatically runs ktlint checks if installed
    - Prevents commits if ktlint finds issues
 
@@ -48,5 +38,3 @@ In case of emergency, you can bypass the pre-commit hook using:
 ```bash
 git commit --no-verify
 ```
-
-**Note**: This is not recommended for normal development workflow.

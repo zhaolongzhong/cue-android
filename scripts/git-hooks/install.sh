@@ -26,8 +26,7 @@ if [ -x .git/hooks/pre-commit ]; then
     echo "Pre-commit hook is now active and will:"
     echo "  • Prevent direct commits to protected branches"
     echo "  • Enforce branch naming conventions"
-    echo "  • Validate commit message format"
-    echo "  • Run ktlint checks (if available)"
+    echo "  • Run lint checks (if available)"
 else
     echo -e "${RED}✗ Failed to install git hooks${NC}"
     exit 1

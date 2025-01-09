@@ -32,7 +32,7 @@ if [ "$is_protected" = true ]; then
     echo -e "${YELLOW}│            Protected Branch Workflow                │${NC}"
     echo -e "${YELLOW}└────────────────────────────────────────────────────┘${NC}"
     echo -e "${BLUE}1. Create a new feature branch:${NC}"
-    echo -e "   git checkout -b feature/your-feature-name"
+    echo -e "   git checkout -b feat/your-feature-name"
     echo -e "   git checkout -b bugfix/your-bugfix-name"
     echo -e ""
     echo -e "${BLUE}2. Standard workflow:${NC}"
@@ -51,10 +51,11 @@ if [ "$is_protected" = true ]; then
 fi
 
 # Verify branch naming convention
-branch_pattern="^(feature|bugfix|docs|style|refactor|test|chore)/.+"
+branch_pattern="^(feat|feature|bugfix|docs|style|refactor|test|chore)/.+"
 if [[ ! $branch =~ $branch_pattern ]]; then
     echo -e "${RED}🚫 ERROR: Invalid branch name format${NC}"
     echo -e "${YELLOW}Branch name must follow the convention:${NC}"
+    echo -e "• feat/feature-name   ${GREEN}(for new features)${NC}"
     echo -e "• feature/feature-name ${GREEN}(for new features)${NC}"
     echo -e "• bugfix/bug-name     ${GREEN}(for bug fixes)${NC}"
     echo -e "• docs/change-name    ${GREEN}(for documentation)${NC}"
@@ -65,35 +66,12 @@ if [[ ! $branch =~ $branch_pattern ]]; then
     echo -e ""
     echo -e "${BLUE}To rename your branch:${NC}"
     echo -e "1. Create new branch with correct name:"
-    echo -e "   git checkout -b feature/your-feature-name"
+    echo -e "   git checkout -b feat/your-feature-name"
     echo -e ""
     echo -e "2. Move your changes:"
-    echo -e "   git checkout feature/your-feature-name"
+    echo -e "   git checkout feat/your-feature-name"
     echo -e ""
     exit 1
-fi
-
-# Check commit message format (if staging area is not empty)
-if git diff --cached --quiet; then
-    :
-else
-    # Get the commit message from the staged changes
-    commit_msg=$(git log -1 --pretty=%B)
-    commit_pattern="^(feat|fix|docs|style|refactor|test|chore)(\([a-z]+\))?: .+"
-    
-    if [[ ! $commit_msg =~ $commit_pattern ]]; then
-        echo -e "${RED}🚫 ERROR: Invalid commit message format${NC}"
-        echo -e "${YELLOW}Commit message must follow conventional commits:${NC}"
-        echo -e "• feat: add user authentication"
-        echo -e "• fix: resolve crash in MainActivity"
-        echo -e "• docs: update README for setup steps"
-        echo -e "• style: improve chat bubble layout"
-        echo -e "• refactor: extract network layer"
-        echo -e "• test: add unit tests for AuthViewModel"
-        echo -e "• chore: update ktlint rules"
-        echo -e ""
-        exit 1
-    fi
 fi
 
 # Run ktlint if available
