@@ -1,12 +1,16 @@
 package com.example.cue.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.cue.AppViewModel
 import com.example.cue.assistant.ui.AssistantScreen
 import com.example.cue.auth.ui.LoginScreen
 import com.example.cue.auth.ui.SignUpScreen
@@ -27,10 +31,12 @@ object Routes {
 fun CueNavigation(
     navController: NavHostController,
     modifier: Modifier = Modifier,
+    viewModel: AppViewModel = hiltViewModel(),
 ) {
+    val isAuthenticated by viewModel.isAuthenticated.collectAsState()
     NavHost(
         navController = navController,
-        startDestination = Routes.LOGIN,
+        startDestination = if (isAuthenticated) Routes.HOME else Routes.LOGIN,
         modifier = modifier,
     ) {
         authGraph(navController)
