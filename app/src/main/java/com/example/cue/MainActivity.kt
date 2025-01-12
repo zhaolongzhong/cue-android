@@ -28,6 +28,7 @@ import com.example.cue.navigation.CueNavigation
 import com.example.cue.navigation.Routes
 import com.example.cue.ui.components.CueBottomNavigation
 import com.example.cue.ui.components.CueDrawer
+import com.example.cue.assistant.viewmodel.DrawerAssistantViewModel
 import com.example.cue.ui.theme.CueTheme
 import com.example.cue.ui.theme.ThemeController
 import dagger.hilt.android.AndroidEntryPoint
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var themeController: ThemeController
     private val appViewModel: AppViewModel by viewModels()
+    private val drawerAssistantViewModel: DrawerAssistantViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +79,11 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
+                            assistants = drawerAssistantViewModel.assistants,
+                            selectedAssistantId = drawerAssistantViewModel.selectedAssistantId,
+                            onAssistantSelected = { assistantId ->
+                                drawerAssistantViewModel.setSelectedAssistant(assistantId)
+                            }
                         )
                     },
                 ) {
