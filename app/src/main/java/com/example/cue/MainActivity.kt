@@ -24,9 +24,9 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.cue.assistant.viewmodel.DrawerAssistantViewModel
 import com.example.cue.navigation.CueNavigation
 import com.example.cue.navigation.Routes
-import com.example.cue.ui.components.CueBottomNavigation
 import com.example.cue.ui.components.CueDrawer
 import com.example.cue.ui.theme.CueTheme
 import com.example.cue.ui.theme.ThemeController
@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var themeController: ThemeController
     private val appViewModel: AppViewModel by viewModels()
+    private val drawerAssistantViewModel: DrawerAssistantViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +78,12 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             },
+                            assistants = drawerAssistantViewModel.assistants,
+                            selectedAssistantId = drawerAssistantViewModel.selectedAssistantId,
+                            onAssistantSelected = { assistantId ->
+                                navController.navigate(Routes.assistantChat(assistantId))
+                                drawerAssistantViewModel.setSelectedAssistant(assistantId)
+                            },
                         )
                     },
                 ) {
@@ -87,28 +94,21 @@ class MainActivity : ComponentActivity() {
                                     Routes.HOME,
                                     Routes.ASSISTANTS,
                                     Routes.SETTINGS,
+                                    Routes.ASSISTANT_CHAT,
                                 )
                             ) {
                                 TopAppBar(
-                                    title = { Text(currentRoute.replaceFirstChar { it.uppercase() }) },
+                                    title = {
+                                        Text(
+                                            when {
+                                                currentRoute.startsWith(Routes.ASSISTANT_CHAT) -> "Chat"
+                                                else -> currentRoute.replaceFirstChar { it.uppercase() }
+                                            },
+                                        )
+                                    },
                                     navigationIcon = {
                                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                             Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                        }
-                                    },
-                                )
-                            }
-                        },
-                        bottomBar = {
-                            // Only show bottom navigation when user is authenticated
-                            if (currentRoute in listOf(Routes.HOME, Routes.SETTINGS)) {
-                                CueBottomNavigation(
-                                    currentRoute = currentRoute,
-                                    onNavigate = { route ->
-                                        navController.navigate(route) {
-                                            popUpTo(Routes.HOME) {
-                                                inclusive = route == Routes.HOME
-                                            }
                                         }
                                     },
                                 )

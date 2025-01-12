@@ -8,6 +8,9 @@ import com.example.cue.network.delete
 import com.example.cue.network.get
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,6 +19,16 @@ class AssistantRepository @Inject constructor(
     private val networkClient: NetworkClient,
     private val moshi: Moshi,
 ) {
+
+    private val _assistants = MutableStateFlow<List<Assistant>>(emptyList())
+    val assistants: StateFlow<List<Assistant>> = _assistants.asStateFlow()
+
+    suspend fun refreshAssistants() {
+        getAssistants()
+            .onSuccess { assistants ->
+                _assistants.value = assistants
+            }
+    }
     suspend fun getAssistants(skip: Int = 0, limit: Int = 20): Result<List<Assistant>> =
         runCatching {
             val jsonResponse: String = networkClient.get("/assistants?skip=$skip&limit=$limit")
