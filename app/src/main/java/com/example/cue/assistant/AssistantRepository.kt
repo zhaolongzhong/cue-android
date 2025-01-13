@@ -2,10 +2,13 @@ package com.example.cue.assistant
 
 import com.example.cue.assistant.models.Assistant
 import com.example.cue.assistant.models.AssistantCreationParams
+import com.example.cue.chat.models.ConversationModel
+import com.example.cue.chat.models.MessageModel
 import com.example.cue.network.NetworkClient
 import com.example.cue.network.NetworkError
 import com.example.cue.network.delete
 import com.example.cue.network.get
+import com.example.cue.network.post
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -84,5 +87,57 @@ class AssistantRepository @Inject constructor(
         networkClient.delete(
             endpoint = "/assistants/$id",
         )
+    }
+
+    suspend fun listAssistantConversations(
+        assistantId: String,
+        isPrimary: Boolean? = null,
+        skip: Int = 0,
+        limit: Int = 20,
+    ): Result<List<ConversationModel>> = runCatching {
+        val endpoint = buildString {
+            append("/assistants/$assistantId/conversations?skip=$skip&limit=$limit")
+            if (isPrimary != null) {
+                append("&is_primary=$isPrimary")
+            }
+        }
+
+        val jsonResponse: String = networkClient.get(endpoint)
+        val type = Types.newParameterizedType(List::class.java, ConversationModel::class.java)
+        val adapter = moshi.adapter<List<ConversationModel>>(type)
+
+        adapter.fromJson(jsonResponse)
+            ?: throw NetworkError.ParseError("Failed to parse conversations")
+    }
+
+    suspend fun createPrimaryConversation(
+        assistantId: String,
+        title: String = "Default",
+    ): Result<ConversationModel> = runCatching {
+        networkClient.post(
+            endpoint = "/conversations",
+            body = mapOf(
+                "title" to title,
+                "assistant_id" to assistantId,
+                "metadata" to mapOf("is_primary" to true),
+            ),
+            responseType = ConversationModel::class.java,
+        )
+    }
+
+    suspend fun listMessages(
+        conversationId: String,
+        skip: Int = 0,
+        limit: Int = 50,
+    ): Result<List<MessageModel>> = runCatching {
+        val jsonResponse: String = networkClient.get(
+            "/conversations/$conversationId/messages?skip=$skip&limit=$limit",
+        )
+
+        val type = Types.newParameterizedType(List::class.java, MessageModel::class.java)
+        val adapter = moshi.adapter<List<MessageModel>>(type)
+
+        adapter.fromJson(jsonResponse)
+            ?: throw NetworkError.ParseError("Failed to parse messages")
     }
 }
