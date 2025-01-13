@@ -84,6 +84,7 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate(Routes.assistantChat(assistantId))
                                 drawerAssistantViewModel.setSelectedAssistant(assistantId)
                             },
+                            clientStatuses = appViewModel.clientStatuses,
                         )
                     },
                 ) {
