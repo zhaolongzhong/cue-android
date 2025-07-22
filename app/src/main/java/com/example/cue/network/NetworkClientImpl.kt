@@ -1,6 +1,7 @@
 package com.example.cue.network
 
 import android.content.SharedPreferences
+import com.example.cue.utils.AppLog
 import com.squareup.moshi.Moshi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -130,9 +131,13 @@ class NetworkClientImpl @Inject constructor(
     }
 
     private suspend fun <T> executeRequest(request: Request, clazz: Class<T>): T {
+        AppLog.info("NetworkClient: ${request.method} ${request.url}")
         try {
             okHttpClient.newCall(request).execute().use { response ->
+                AppLog.info("NetworkClient Response: ${response.code} for ${request.url}")
                 if (!response.isSuccessful) {
+                    val errorBody = response.body?.string() ?: ""
+                    AppLog.error("NetworkClient Error: ${response.code} - $errorBody")
                     when (response.code) {
                         401 -> throw NetworkError.Unauthorized()
                         else -> throw NetworkError.HttpError(response.code, response.message)

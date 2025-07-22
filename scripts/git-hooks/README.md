@@ -8,6 +8,21 @@ Automated git hooks for code quality and consistency.
 ./scripts/git-hooks/install.sh
 ```
 
+## Management
+
+Use the management script for easy control:
+
+```bash
+# Check hook status
+./scripts/manage-hooks.sh status
+
+# Enable hooks
+./scripts/manage-hooks.sh enable
+
+# Disable hooks temporarily  
+./scripts/manage-hooks.sh disable
+```
+
 ## Features
 
 ### Protected Branches
@@ -48,10 +63,16 @@ docs: update installation guide
 - Auto-commits formatting fixes
 - Restores state if format fails
 
-### Bypass Hooks
+## Skipping Hooks
+
+You can skip the pre-commit hook when needed:
 
 ```bash
-git commit --no-verify  # Use cautiously
+# Skip pre-commit for one commit using environment variable
+SKIP_PRECOMMIT=1 git commit -m "urgent fix"
+
+# Skip all hooks for one commit using git option
+git commit -m "urgent fix" --no-verify
 ```
 
 ## Implementation

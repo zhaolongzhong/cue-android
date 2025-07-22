@@ -1,11 +1,11 @@
 package com.example.cue.auth
 
 import android.content.SharedPreferences
-import android.util.Log
 import com.example.cue.auth.models.TokenResponse
 import com.example.cue.auth.models.User
 import com.example.cue.network.NetworkClient
 import com.example.cue.network.NetworkError
+import com.example.cue.utils.AppLog
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +35,7 @@ class AuthService @Inject constructor(
     }
 
     suspend fun login(email: String, password: String): String {
+        AppLog.info("AuthService.login() - Attempting login for user: $email")
         return try {
             val response = networkClient.postFormUrlEncoded<TokenResponse>(
                 "/accounts/login",
@@ -46,6 +47,7 @@ class AuthService @Inject constructor(
                 TokenResponse::class.java,
             )
 
+            AppLog.info("AuthService.login() - Login successful, saving token")
             saveAccessToken(response.accessToken)
             _isAuthenticated.value = true
             fetchUserProfile()
@@ -58,7 +60,7 @@ class AuthService @Inject constructor(
                     throw AuthError.NetworkError
                 }
                 else -> {
-                    Log.e(TAG, "Login error", e)
+                    AppLog.error("Login error", e)
                     throw AuthError.NetworkError
                 }
             }
@@ -85,7 +87,7 @@ class AuthService @Inject constructor(
                     throw AuthError.NetworkError
                 }
                 else -> {
-                    Log.e(TAG, "Signup error", e)
+                    AppLog.error("Signup error", e)
                     throw AuthError.NetworkError
                 }
             }
@@ -98,17 +100,17 @@ class AuthService @Inject constructor(
                 "/accounts/me",
                 User::class.java,
             )
-            Log.d(TAG, "fetchUserProfile userid: ${user.email}")
+            AppLog.debug("fetchUserProfile userid: ${user.email}")
             _currentUser.value = user
             user
         } catch (e: Exception) {
-            Log.e(TAG, "Fetch user profile error", e)
+            AppLog.error("Fetch user profile error", e)
             null
         }
     }
 
     fun logout() {
-        Log.d(TAG, "AuthService logout")
+        AppLog.debug("AuthService logout")
         _isAuthenticated.value = false
         removeAccessToken()
         _currentUser.value = null

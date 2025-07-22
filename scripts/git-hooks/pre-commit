@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Allow skipping pre-commit hook with environment variable
+if [ "$SKIP_PRECOMMIT" = "1" ] || [ "$SKIP_PRECOMMIT" = "true" ]; then
+    echo "⚠️  Pre-commit hook skipped via SKIP_PRECOMMIT environment variable"
+    exit 0
+fi
+
 # Get current branch
 branch="$(git symbolic-ref --short HEAD 2>/dev/null)"
 [[ $? -ne 0 ]] && echo "Not on any branch" && exit 1

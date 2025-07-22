@@ -1,11 +1,11 @@
 package com.example.cue
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cue.assistant.ClientStatusService
 import com.example.cue.auth.AuthService
 import com.example.cue.network.websocket.WebSocketService
+import com.example.cue.utils.AppLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
@@ -35,10 +35,7 @@ class AppViewModel @Inject constructor(
         viewModelScope.launch {
             authService.isAuthenticated
                 .onEach { isAuthenticated ->
-                    Log.d(
-                        TAG,
-                        "Auth state changed - authenticated: $isAuthenticated, foreground: $isAppInForeground",
-                    )
+                    AppLog.debug("Auth state changed - authenticated: $isAuthenticated, foreground: $isAppInForeground")
                     if (isAuthenticated && isAppInForeground) {
                         authService.fetchUserProfile()
                         connectWebSocket()
@@ -56,8 +53,10 @@ class AppViewModel @Inject constructor(
     }
 
     fun onAppForeground() {
+        AppLog.info("AppViewModel onAppForeground() - App came to foreground")
         isAppInForeground = true
         if (authService.isAuthenticated.value) {
+            AppLog.debug("User authenticated, fetching profile and connecting WebSocket")
             viewModelScope.launch {
                 authService.fetchUserProfile()
             }
@@ -66,6 +65,7 @@ class AppViewModel @Inject constructor(
     }
 
     fun onAppBackground() {
+        AppLog.info("AppViewModel onAppBackground() - App went to background")
         isAppInForeground = false
         disconnectWebSocket()
     }

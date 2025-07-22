@@ -30,6 +30,7 @@ import com.example.cue.navigation.Routes
 import com.example.cue.ui.components.CueDrawer
 import com.example.cue.ui.theme.CueTheme
 import com.example.cue.ui.theme.ThemeController
+import com.example.cue.utils.AppLog
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 import kotlinx.coroutines.launch
@@ -44,13 +45,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppLog.info("MainActivity onCreate() - Activity started")
+
         lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onStart(owner: LifecycleOwner) {
+                    AppLog.info("MainActivity onStart() - App in foreground")
                     appViewModel.onAppForeground()
                 }
 
                 override fun onStop(owner: LifecycleOwner) {
+                    AppLog.info("MainActivity onStop() - App in background")
                     appViewModel.onAppBackground()
                 }
             },

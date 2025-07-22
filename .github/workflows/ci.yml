@@ -11,11 +11,19 @@ jobs:
   build:
     runs-on: [ "mac-mini", "mac", "macos" ]
     env:
-      ANDROID_HOME: /Users/zz/Library/Android/sdk
+      ANDROID_HOME: ~/Library/Android/sdk
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set Android Home
+        run: |
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            echo "ANDROID_HOME=$HOME/Library/Android/sdk" >> $GITHUB_ENV
+          else
+            echo "ANDROID_HOME=/opt/android-sdk" >> $GITHUB_ENV
+          fi
 
       #      - name: Set up JDK 17
       #        uses: actions/setup-java@v4
