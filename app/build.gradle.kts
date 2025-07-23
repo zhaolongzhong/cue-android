@@ -37,6 +37,7 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField("String", "OPENAI_API_KEY", "\"${getProperty("OPENAI_API_KEY")}\"")
+        buildConfigField("String", "ANTHROPIC_API_KEY", "\"${getProperty("ANTHROPIC_API_KEY")}\"")
         buildConfigField("String", "API_BASE_URL", "\"${getProperty("API_BASE_URL")}\"")
         buildConfigField("String", "WEBSOCKET_BASE_URL", "\"${getProperty("WEBSOCKET_BASE_URL")}\"")
     }
@@ -60,6 +61,12 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/DEPENDENCIES"
+        }
     }
 }
 
@@ -104,6 +111,9 @@ dependencies {
     // Moshi
     implementation(libs.moshi.kotlin)
     ksp(libs.moshi.kotlin.codegen)
+
+    // Anthropic SDK
+    implementation(libs.anthropic.java)
 
     // Testing
     testImplementation(libs.junit)

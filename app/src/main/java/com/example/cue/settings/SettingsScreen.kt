@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ExitToApp
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Info
@@ -47,6 +48,7 @@ import com.example.cue.ui.theme.ColorSchemeOption
 fun SettingsScreen(
     onNavigateToApiKeys: () -> Unit,
     onLogout: () -> Unit,
+    onNavigateToDebug: (() -> Unit)? = null,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -105,6 +107,21 @@ fun SettingsScreen(
                                 onClick = onNavigateToApiKeys,
                                 showChevron = true,
                             )
+                        }
+                    }
+
+                    // Debug Section (only show if callback is provided)
+                    onNavigateToDebug?.let { debugCallback ->
+                        item {
+                            SettingsSection(title = "Debug") {
+                                SettingsRow(
+                                    icon = Icons.Default.BugReport,
+                                    title = "AI Provider Settings",
+                                    subtitle = "Change AI provider (Anthropic, OpenAI, Gemini, Cue)",
+                                    onClick = debugCallback,
+                                    showChevron = true,
+                                )
+                            }
                         }
                     }
 

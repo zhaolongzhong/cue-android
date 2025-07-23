@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -107,6 +108,16 @@ fun CueDrawer(
 
             HorizontalDivider()
             DrawerItem(
+                icon = Icons.Default.SmartToy,
+                label = "Anthropic Chat",
+                selected = currentRoute == Routes.ANTHROPIC_CHAT,
+                route = Routes.ANTHROPIC_CHAT,
+                drawerState = drawerState,
+                scope = scope,
+                onNavigate = onNavigate,
+                modifier = Modifier.padding(vertical = 4.dp),
+            )
+            DrawerItem(
                 icon = Icons.Default.Settings,
                 label = "Settings",
                 selected = currentRoute == Routes.SETTINGS,
@@ -114,7 +125,7 @@ fun CueDrawer(
                 drawerState = drawerState,
                 scope = scope,
                 onNavigate = onNavigate,
-                modifier = Modifier.padding(vertical = 8.dp),
+                modifier = Modifier.padding(vertical = 4.dp),
             )
         }
     }

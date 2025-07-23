@@ -101,6 +101,7 @@ class MainActivity : ComponentActivity() {
                                     Routes.ASSISTANTS,
                                     Routes.SETTINGS,
                                     Routes.ASSISTANT_CHAT,
+                                    Routes.ANTHROPIC_CHAT,
                                 )
                             ) {
                                 TopAppBar(
@@ -108,6 +109,7 @@ class MainActivity : ComponentActivity() {
                                         Text(
                                             when {
                                                 currentRoute.startsWith(Routes.ASSISTANT_CHAT) -> "Chat"
+                                                currentRoute == Routes.ANTHROPIC_CHAT -> "Anthropic Chat"
                                                 else -> currentRoute.replaceFirstChar { it.uppercase() }
                                             },
                                         )

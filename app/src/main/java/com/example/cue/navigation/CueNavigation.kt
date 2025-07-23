@@ -13,10 +13,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cue.AppViewModel
+import com.example.cue.anthropic.AnthropicChatScreen
 import com.example.cue.assistant.ui.AssistantScreen
 import com.example.cue.auth.ui.LoginScreen
 import com.example.cue.auth.ui.SignUpScreen
 import com.example.cue.chat.AssistantChatScreen
+import com.example.cue.debug.DebugScreen
 import com.example.cue.openai.OpenAIChatScreen
 import com.example.cue.settings.SettingsScreen
 import com.example.cue.settings.apikeys.ApiKeysScreen
@@ -29,6 +31,8 @@ object Routes {
     const val ASSISTANTS = "assistants"
     const val API_KEYS = "api_keys"
     const val ASSISTANT_CHAT = "assistant_chat/{assistantId}"
+    const val ANTHROPIC_CHAT = "anthropic_chat"
+    const val DEBUG = "debug"
     fun assistantChat(assistantId: String) = "assistant_chat/$assistantId"
 }
 
@@ -89,6 +93,9 @@ fun NavGraphBuilder.mainGraph(navController: NavController) {
                     popUpTo(0) { inclusive = true }
                 }
             },
+            onNavigateToDebug = {
+                navController.navigate(Routes.DEBUG)
+            },
         )
     }
     composable(
@@ -105,6 +112,16 @@ fun NavGraphBuilder.mainGraph(navController: NavController) {
     }
     composable(Routes.API_KEYS) {
         ApiKeysScreen(
+            onNavigateBack = {
+                navController.popBackStack()
+            },
+        )
+    }
+    composable(Routes.ANTHROPIC_CHAT) {
+        AnthropicChatScreen()
+    }
+    composable(Routes.DEBUG) {
+        DebugScreen(
             onNavigateBack = {
                 navController.popBackStack()
             },

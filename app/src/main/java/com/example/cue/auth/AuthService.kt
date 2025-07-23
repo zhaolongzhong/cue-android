@@ -13,12 +13,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 private const val TAG = "AuthService"
-private const val ACCESS_TOKEN_KEY = "ACCESS_TOKEN_KEY"
 
 @Singleton
 class AuthService @Inject constructor(
     private val networkClient: NetworkClient,
     private val sharedPreferences: SharedPreferences,
+    private val tokenManager: TokenManager,
 ) {
     private val _isAuthenticated = MutableStateFlow(false)
     val isAuthenticated: StateFlow<Boolean> = _isAuthenticated.asStateFlow()
@@ -30,8 +30,7 @@ class AuthService @Inject constructor(
     val isGeneratingToken: StateFlow<Boolean> = _isGeneratingToken.asStateFlow()
 
     init {
-        val token = getAccessToken()
-        _isAuthenticated.value = !token.isNullOrEmpty()
+        _isAuthenticated.value = tokenManager.hasValidAccessToken()
     }
 
     suspend fun login(email: String, password: String): String {
@@ -48,7 +47,7 @@ class AuthService @Inject constructor(
             )
 
             AppLog.info("AuthService.login() - Login successful, saving token")
-            saveAccessToken(response.accessToken)
+            tokenManager.saveAccessToken(response.accessToken)
             _isAuthenticated.value = true
             fetchUserProfile()
             response.accessToken
@@ -112,19 +111,7 @@ class AuthService @Inject constructor(
     fun logout() {
         AppLog.debug("AuthService logout")
         _isAuthenticated.value = false
-        removeAccessToken()
+        tokenManager.clearTokens()
         _currentUser.value = null
-    }
-
-    private fun getAccessToken(): String? {
-        return sharedPreferences.getString(ACCESS_TOKEN_KEY, null)
-    }
-
-    private fun saveAccessToken(token: String) {
-        sharedPreferences.edit().putString(ACCESS_TOKEN_KEY, token).apply()
-    }
-
-    private fun removeAccessToken() {
-        sharedPreferences.edit().remove(ACCESS_TOKEN_KEY).apply()
     }
 }
