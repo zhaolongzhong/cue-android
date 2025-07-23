@@ -1,4 +1,4 @@
-package com.example.cue.openai
+package com.example.cue.anthropic
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
@@ -17,35 +17,49 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cue.debug.DebugBottomSheetContent
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OpenAIChatScreen(
+fun AnthropicChatScreen(
     modifier: Modifier = Modifier,
-    viewModel: OpenAIChatViewModel = hiltViewModel(),
+    viewModel: AnthropicChatViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     val context = LocalContext.current
+
+    var showDebugBottomSheet by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+    )
 
     LaunchedEffect(uiState.messages.size) {
         if (uiState.messages.isNotEmpty()) {
@@ -60,61 +74,92 @@ fun OpenAIChatScreen(
         }
     }
 
-    Column(
+    Box(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth(),
-            state = listState,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+        Column(
+            modifier = Modifier.fillMaxSize(),
         ) {
-            items(uiState.messages) { message ->
-                ChatMessage(message = message)
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                items(uiState.messages) { message ->
+                    ChatMessage(message = message)
+                }
+
+                if (uiState.isLoading) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
+                    }
+                }
             }
 
-            if (uiState.isLoading) {
-                item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                OutlinedTextField(
+                    value = uiState.inputText,
+                    onValueChange = viewModel::updateInputText,
+                    modifier = Modifier.weight(1f),
+                    placeholder = { Text("Type a message...") },
+                    maxLines = 3,
+                    enabled = !uiState.isLoading,
+                )
+
+                IconButton(
+                    onClick = viewModel::sendMessage,
+                    enabled = !uiState.isLoading && uiState.inputText.isNotBlank(),
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.Send,
+                        contentDescription = "Send message",
+                    )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+        IconButton(
+            onClick = { showDebugBottomSheet = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 80.dp),
         ) {
-            OutlinedTextField(
-                value = uiState.inputText,
-                onValueChange = viewModel::updateInputText,
-                modifier = Modifier.weight(1f),
-                placeholder = { Text("Type a message...") },
-                maxLines = 3,
-                enabled = !uiState.isLoading,
+            Icon(
+                imageVector = Icons.Default.BugReport,
+                contentDescription = "AI Provider Settings",
+                tint = MaterialTheme.colorScheme.primary,
             )
+        }
+    }
 
-            IconButton(
-                onClick = viewModel::sendMessage,
-                enabled = !uiState.isLoading && uiState.inputText.isNotBlank(),
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = "Send message",
-                )
-            }
+    if (showDebugBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { showDebugBottomSheet = false },
+            sheetState = bottomSheetState,
+            dragHandle = { BottomSheetDefaults.DragHandle() },
+        ) {
+            DebugBottomSheetContent(
+                onProviderSelected = {
+                    showDebugBottomSheet = false
+                },
+            )
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.example.cue.openai
 
 import android.util.Log
+import com.example.cue.network.ErrorResponseParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -12,6 +13,8 @@ import kotlin.random.Random
 
 class OpenAIClient(private val apiKey: String) {
     private val baseUrl = "https://api.openai.com/v1"
+    private val errorParser = ErrorResponseParser()
+
     companion object {
         const val TAG = "OpenAIClient"
     }
@@ -168,10 +171,16 @@ class OpenAIClient(private val apiKey: String) {
 
                 result
             } else {
-                // Read error response
                 val errorResponse = connection.errorStream?.bufferedReader()?.use { it.readText() }
                 Log.e(TAG, "Error response: $errorResponse")
-                throw RuntimeException("API returned error code: $responseCode, body: $errorResponse")
+
+                val errorMessage = errorParser.parseErrorResponse(
+                    responseCode,
+                    errorResponse,
+                    ErrorResponseParser.ApiProvider.OPENAI,
+                )
+
+                throw RuntimeException(errorMessage)
             }
         } catch (e: Exception) {
             Log.e(TAG, "Exception occurred: ${e.message}")

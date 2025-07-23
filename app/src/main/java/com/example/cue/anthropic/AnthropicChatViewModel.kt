@@ -1,4 +1,4 @@
-package com.example.cue.openai
+package com.example.cue.anthropic
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,7 +16,7 @@ data class Message(
     val timestamp: Long = System.currentTimeMillis(),
 )
 
-data class OpenAIChatUiState(
+data class AnthropicChatUiState(
     val messages: List<Message> = emptyList(),
     val inputText: String = "",
     val isLoading: Boolean = false,
@@ -24,12 +24,12 @@ data class OpenAIChatUiState(
 )
 
 @HiltViewModel
-class OpenAIChatViewModel @Inject constructor(
-    private val chatService: OpenAIChatService,
+class AnthropicChatViewModel @Inject constructor(
+    private val chatService: AnthropicChatService,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(OpenAIChatUiState())
-    val uiState: StateFlow<OpenAIChatUiState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow(AnthropicChatUiState())
+    val uiState: StateFlow<AnthropicChatUiState> = _uiState.asStateFlow()
 
     fun updateInputText(text: String) {
         _uiState.update { it.copy(inputText = text) }
