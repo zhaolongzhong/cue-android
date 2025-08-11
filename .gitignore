@@ -17,3 +17,7 @@ local.properties
 
 logs/
 temp/
+CONTEXT.md
+CLAUDE.md
+.cue/
+.claude/
