@@ -18,19 +18,18 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.spotless)
-    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.example.cue"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.cue"
         minSdk = 29
-        targetSdk = 34
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -100,7 +99,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
-    kapt(libs.hilt.compiler)
+    ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     // Network
