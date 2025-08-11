@@ -12,14 +12,21 @@ SCREENSHOTS_DIR="$LOGS_DIR/screenshots"
 
 echo "🐛 Starting debug session..."
 
+# Check if device is connected first
+if ! adb devices | grep -q "device$"; then
+    echo "❌ No Android device connected"
+    echo "💡 Start an emulator or connect a device before debugging"
+    exit 1
+fi
+
 # 1. Build and deploy
 echo "🔨 Building and deploying app..."
-./scripts/run.sh > /tmp/build_output.log 2>&1
-
-# Check for build errors
-if [ $? -ne 0 ]; then
+if ! ./scripts/run.sh > /tmp/build_output.log 2>&1; then
     echo "❌ Build failed!"
+    echo "📄 Build output:"
     cat /tmp/build_output.log
+    echo ""
+    echo "💡 Try: ./gradlew clean assembleDebug"
     exit 1
 fi
 
