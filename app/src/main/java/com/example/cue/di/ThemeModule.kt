@@ -15,7 +15,5 @@ object ThemeModule {
 
     @Provides
     @Singleton
-    fun provideThemeController(@ApplicationContext context: Context): ThemeController {
-        return ThemeController(context)
-    }
+    fun provideThemeController(@ApplicationContext context: Context): ThemeController = ThemeController(context)
 }

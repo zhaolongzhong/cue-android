@@ -175,12 +175,10 @@ class WebSocketService @Inject constructor(
         }
     }
 
-    private fun calculateRetryDelay(): Long {
-        return min(
-            INITIAL_RETRY_DELAY * 2.0.pow(retryAttempt.toDouble()).toLong(),
-            MAX_RETRY_DELAY,
-        )
-    }
+    private fun calculateRetryDelay(): Long = min(
+        INITIAL_RETRY_DELAY * 2.0.pow(retryAttempt.toDouble()).toLong(),
+        MAX_RETRY_DELAY,
+    )
 
     private fun startPingTimer() {
         stopPingTimer()
@@ -207,7 +205,8 @@ class WebSocketService @Inject constructor(
                         send(pingMessage)
                     }
                 },
-                PING_INTERVAL, PING_INTERVAL,
+                PING_INTERVAL,
+                PING_INTERVAL,
             )
         }
     }

@@ -1,22 +1,22 @@
 [versions]
-agp = "8.2.2"
-json = "20240205"
+agp = "8.11.1"
+json = "20250517"
 kotlin = "2.1.0"
-coreKtx = "1.12.0"
-datastore = "1.1.1"
+coreKtx = "1.16.0"
+datastore = "1.1.7"
 junit = "4.13.2"
-junitVersion = "1.1.5"
-espressoCore = "3.5.1"
-lifecycleCompose = "2.8.7"
-lifecycleRuntimeKtx = "2.8.7"
-activityCompose = "1.9.3"
-composeBom = "2024.12.01"
-spotless = "6.25.0"
-hilt = "2.53.1"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycleCompose = "2.9.2"
+lifecycleRuntimeKtx = "2.9.2"
+activityCompose = "1.10.1"
+composeBom = "2025.07.00"
+spotless = "7.2.1"
+hilt = "2.57"
 hiltNavigationCompose = "1.2.0"
-navigationCompose = "2.8.5"
+navigationCompose = "2.9.3"
 moshi = "1.15.2"
-okhttp = "4.12.0"
+okhttp = "5.1.0"
 ksp = "2.1.0-1.0.29"
 anthropic = "2.4.0"
 
@@ -31,16 +31,7 @@ androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecyc
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
 androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
-androidx-datastore = { group = "androidx.datastore", name = "datastore-android", version.ref = "datastore" }
-androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastore" }
-androidx-datastore-core-okio-jvm = { group = "androidx.datastore", name = "datastore-core-okio-jvm", version.ref = "datastore" }
-androidx-datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "datastore" }
-androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastore" }
-androidx-datastore-preferences-android = { group = "androidx.datastore", name = "datastore-preferences-android", version.ref = "datastore" }
-androidx-datastore-preferences-core-jvm = { group = "androidx.datastore", name = "datastore-preferences-core-jvm", version.ref = "datastore" }
-androidx-datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "datastore" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
-androidx-datastore-base = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }

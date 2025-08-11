@@ -11,7 +11,5 @@ import kotlinx.coroutines.Dispatchers
 @InstallIn(ActivityRetainedComponent::class)
 object CoroutineModule {
     @Provides
-    fun provideCoroutineDispatcher(): CoroutineDispatcher {
-        return Dispatchers.IO
-    }
+    fun provideCoroutineDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }

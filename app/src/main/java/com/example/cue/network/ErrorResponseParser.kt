@@ -52,33 +52,31 @@ class ErrorResponseParser {
         return "API error (code: $responseCode)"
     }
 
-    private fun parseAnthropicError(errorJson: JSONObject, responseCode: Int): String {
-        return when {
-            errorJson.has("error") -> {
-                val error = when (val errorField = errorJson.get("error")) {
-                    is JSONObject -> errorField
-                    is String -> JSONObject().put("message", errorField)
-                    else -> JSONObject()
-                }
-
-                val message = error.optString("message", "")
-                val type = error.optString("type", "")
-
-                when {
-                    message.contains("authentication", ignoreCase = true) ||
-                        message.contains("unauthorized", ignoreCase = true) ->
-                        "Authentication failed: Please check your access token in settings"
-                    message.contains("rate", ignoreCase = true) ->
-                        "Rate limit exceeded: Please wait a moment and try again"
-                    message.contains("overloaded", ignoreCase = true) ->
-                        "Service temporarily overloaded: Please try again later"
-                    message.isNotEmpty() -> message
-                    type.isNotEmpty() -> "Error type: $type"
-                    else -> "API error (code: $responseCode)"
-                }
+    private fun parseAnthropicError(errorJson: JSONObject, responseCode: Int): String = when {
+        errorJson.has("error") -> {
+            val error = when (val errorField = errorJson.get("error")) {
+                is JSONObject -> errorField
+                is String -> JSONObject().put("message", errorField)
+                else -> JSONObject()
             }
-            errorJson.has("message") -> errorJson.getString("message")
-            else -> "API error (code: $responseCode)"
+
+            val message = error.optString("message", "")
+            val type = error.optString("type", "")
+
+            when {
+                message.contains("authentication", ignoreCase = true) ||
+                    message.contains("unauthorized", ignoreCase = true) ->
+                    "Authentication failed: Please check your access token in settings"
+                message.contains("rate", ignoreCase = true) ->
+                    "Rate limit exceeded: Please wait a moment and try again"
+                message.contains("overloaded", ignoreCase = true) ->
+                    "Service temporarily overloaded: Please try again later"
+                message.isNotEmpty() -> message
+                type.isNotEmpty() -> "Error type: $type"
+                else -> "API error (code: $responseCode)"
+            }
         }
+        errorJson.has("message") -> errorJson.getString("message")
+        else -> "API error (code: $responseCode)"
     }
 }

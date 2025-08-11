@@ -86,16 +86,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
 
     // DataStore
-    implementation(libs.androidx.datastore)
-    implementation(libs.androidx.datastore.core.android)
-    implementation(libs.androidx.datastore.core.okio.jvm)
-    implementation(libs.androidx.datastore.core.okio)
-    implementation(libs.androidx.datastore.core)
-    implementation(libs.androidx.datastore.preferences.android)
-    implementation(libs.androidx.datastore.preferences.core.jvm)
-    implementation(libs.androidx.datastore.preferences.core)
     implementation(libs.androidx.datastore.preferences)
-    implementation(libs.androidx.datastore.base)
 
     // Hilt
     implementation(libs.hilt.android)
@@ -127,17 +118,18 @@ dependencies {
 spotless {
     kotlin {
         target("**/*.kt")
-        ktlint("1.0.1").setEditorConfigPath(
-            "${project.rootDir}/.editorconfig",
-        ).editorConfigOverride(
-            mapOf(
-                "disabled_rules" to "function-naming",
-                "ij_kotlin_allow_trailing_comma" to "true",
-                "android" to "true",
-            ),
-        )
+        ktlint("1.7.1")
+            .setEditorConfigPath(
+                "${project.rootDir}/.editorconfig",
+            ).editorConfigOverride(
+                mapOf(
+                    "disabled_rules" to "function-naming",
+                    "ij_kotlin_allow_trailing_comma" to "true",
+                    "android" to "true",
+                ),
+            )
         trimTrailingWhitespace()
-        indentWithSpaces()
+        leadingTabsToSpaces()
         endWithNewline()
     }
     kotlinGradle {

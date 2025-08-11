@@ -39,12 +39,10 @@ enum class Provider {
         }
 
     companion object {
-        fun fromString(value: String): Provider? {
-            return try {
-                valueOf(value.uppercase())
-            } catch (e: IllegalArgumentException) {
-                null
-            }
+        fun fromString(value: String): Provider? = try {
+            valueOf(value.uppercase())
+        } catch (e: IllegalArgumentException) {
+            null
         }
     }
 }

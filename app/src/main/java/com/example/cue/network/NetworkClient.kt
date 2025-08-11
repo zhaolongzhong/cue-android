@@ -63,8 +63,7 @@ suspend inline fun <reified T> NetworkClient.postFormUrlEncoded(
     body: Map<String, String>,
 ): T = this.postFormUrlEncoded(endpoint, body, T::class.java)
 
-suspend inline fun <reified T> NetworkClient.get(endpoint: String): T =
-    this.get(endpoint, T::class.java)
+suspend inline fun <reified T> NetworkClient.get(endpoint: String): T = this.get(endpoint, T::class.java)
 
 suspend inline fun <reified T> NetworkClient.post(
     endpoint: String,
@@ -76,5 +75,4 @@ suspend inline fun <reified T> NetworkClient.put(
     body: Map<String, Any?>,
 ): T = this.put(endpoint, body, T::class.java)
 
-suspend inline fun <reified T> NetworkClient.delete(endpoint: String): T =
-    this.delete(endpoint, T::class.java)
+suspend inline fun <reified T> NetworkClient.delete(endpoint: String): T = this.delete(endpoint, T::class.java)

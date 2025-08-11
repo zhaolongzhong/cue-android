@@ -14,17 +14,13 @@ class TokenManager @Inject constructor(
         private const val REFRESH_TOKEN_KEY = "REFRESH_TOKEN_KEY"
     }
 
-    fun getAccessToken(): String? {
-        return sharedPreferences.getString(ACCESS_TOKEN_KEY, null)
-    }
+    fun getAccessToken(): String? = sharedPreferences.getString(ACCESS_TOKEN_KEY, null)
 
     fun saveAccessToken(token: String) {
         sharedPreferences.edit { putString(ACCESS_TOKEN_KEY, token) }
     }
 
-    fun getRefreshToken(): String? {
-        return sharedPreferences.getString(REFRESH_TOKEN_KEY, null)
-    }
+    fun getRefreshToken(): String? = sharedPreferences.getString(REFRESH_TOKEN_KEY, null)
 
     fun saveRefreshToken(token: String) {
         sharedPreferences.edit { putString(REFRESH_TOKEN_KEY, token) }
@@ -37,7 +33,5 @@ class TokenManager @Inject constructor(
         }
     }
 
-    fun hasValidAccessToken(): Boolean {
-        return !getAccessToken().isNullOrEmpty()
-    }
+    fun hasValidAccessToken(): Boolean = !getAccessToken().isNullOrEmpty()
 }

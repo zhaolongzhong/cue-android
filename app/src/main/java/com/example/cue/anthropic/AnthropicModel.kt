@@ -62,9 +62,7 @@ class AnthropicModel(
         }
     }
 
-    private fun shouldUseBackendProxy(): Boolean {
-        return getCurrentProvider() == Provider.CUE
-    }
+    private fun shouldUseBackendProxy(): Boolean = getCurrentProvider() == Provider.CUE
 
     private fun createClient(): AnthropicClient {
         val currentApiKey = getApiKey()
@@ -107,35 +105,29 @@ class AnthropicModel(
 
     companion object {
         const val TAG = "AnthropicModel"
-        fun fromDynamicApiKey(apiKeyProvider: () -> String?): AnthropicModel {
-            return AnthropicModel(apiKeyProvider = apiKeyProvider)
-        }
+        fun fromDynamicApiKey(apiKeyProvider: () -> String?): AnthropicModel = AnthropicModel(apiKeyProvider = apiKeyProvider)
 
         fun fromDynamicBackendProxy(
             baseUrlProvider: () -> String?,
             authTokenProvider: () -> String?,
             sharedPreferences: SharedPreferences? = null,
-        ): AnthropicModel {
-            return AnthropicModel(
-                apiKeyProvider = authTokenProvider,
-                baseUrl = baseUrlProvider(),
-                sharedPreferences = sharedPreferences,
-                useBackendProxy = true,
-                authTokenProvider = authTokenProvider,
-            )
-        }
+        ): AnthropicModel = AnthropicModel(
+            apiKeyProvider = authTokenProvider,
+            baseUrl = baseUrlProvider(),
+            sharedPreferences = sharedPreferences,
+            useBackendProxy = true,
+            authTokenProvider = authTokenProvider,
+        )
 
-        fun fromClientMode(mode: ClientMode): AnthropicModel {
-            return when (mode) {
-                is ClientMode.Direct -> AnthropicModel(
-                    staticApiKey = mode.apiKey,
-                    baseUrl = mode.baseUrl,
-                )
-                is ClientMode.Proxy -> AnthropicModel(
-                    staticApiKey = mode.authToken ?: "",
-                    baseUrl = mode.baseUrl,
-                )
-            }
+        fun fromClientMode(mode: ClientMode): AnthropicModel = when (mode) {
+            is ClientMode.Direct -> AnthropicModel(
+                staticApiKey = mode.apiKey,
+                baseUrl = mode.baseUrl,
+            )
+            is ClientMode.Proxy -> AnthropicModel(
+                staticApiKey = mode.authToken ?: "",
+                baseUrl = mode.baseUrl,
+            )
         }
     }
 

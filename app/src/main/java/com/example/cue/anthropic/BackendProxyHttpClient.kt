@@ -71,10 +71,8 @@ class BackendProxyHttpClient(
     override fun executeAsync(
         request: HttpRequest,
         requestOptions: RequestOptions,
-    ): CompletableFuture<HttpResponse> {
-        return CompletableFuture.supplyAsync {
-            execute(request, requestOptions)
-        }
+    ): CompletableFuture<HttpResponse> = CompletableFuture.supplyAsync {
+        execute(request, requestOptions)
     }
 
     override fun close() {

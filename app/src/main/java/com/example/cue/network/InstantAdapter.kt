@@ -7,12 +7,8 @@ import java.time.format.DateTimeFormatter
 
 class InstantAdapter {
     @FromJson
-    fun fromJson(string: String): Instant {
-        return Instant.parse(string)
-    }
+    fun fromJson(string: String): Instant = Instant.parse(string)
 
     @ToJson
-    fun toJson(instant: Instant): String {
-        return DateTimeFormatter.ISO_INSTANT.format(instant)
-    }
+    fun toJson(instant: Instant): String = DateTimeFormatter.ISO_INSTANT.format(instant)
 }

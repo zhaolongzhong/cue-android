@@ -154,20 +154,16 @@ private fun ProviderCard(
     }
 }
 
-private fun Provider.getIcon(): ImageVector {
-    return when (this) {
-        Provider.OPENAI -> Icons.Default.Lightbulb
-        Provider.ANTHROPIC -> Icons.Default.Psychology
-        Provider.GEMINI -> Icons.Default.Android
-        Provider.CUE -> Icons.Default.SmartToy
-    }
+private fun Provider.getIcon(): ImageVector = when (this) {
+    Provider.OPENAI -> Icons.Default.Lightbulb
+    Provider.ANTHROPIC -> Icons.Default.Psychology
+    Provider.GEMINI -> Icons.Default.Android
+    Provider.CUE -> Icons.Default.SmartToy
 }
 
-private fun Provider.getDescription(): String {
-    return when (this) {
-        Provider.OPENAI -> "ChatGPT and GPT models"
-        Provider.ANTHROPIC -> "Claude AI models"
-        Provider.GEMINI -> "Google Gemini models"
-        Provider.CUE -> "Custom backend server"
-    }
+private fun Provider.getDescription(): String = when (this) {
+    Provider.OPENAI -> "ChatGPT and GPT models"
+    Provider.ANTHROPIC -> "Claude AI models"
+    Provider.GEMINI -> "Google Gemini models"
+    Provider.CUE -> "Custom backend server"
 }

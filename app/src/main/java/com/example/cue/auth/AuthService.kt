@@ -93,19 +93,17 @@ class AuthService @Inject constructor(
         }
     }
 
-    suspend fun fetchUserProfile(): User? {
-        return try {
-            val user = networkClient.get<User>(
-                "/accounts/me",
-                User::class.java,
-            )
-            AppLog.debug("fetchUserProfile userid: ${user.email}")
-            _currentUser.value = user
-            user
-        } catch (e: Exception) {
-            AppLog.error("Fetch user profile error", e)
-            null
-        }
+    suspend fun fetchUserProfile(): User? = try {
+        val user = networkClient.get<User>(
+            "/accounts/me",
+            User::class.java,
+        )
+        AppLog.debug("fetchUserProfile userid: ${user.email}")
+        _currentUser.value = user
+        user
+    } catch (e: Exception) {
+        AppLog.error("Fetch user profile error", e)
+        null
     }
 
     fun logout() {

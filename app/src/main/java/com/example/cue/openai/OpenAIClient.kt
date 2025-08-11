@@ -34,40 +34,38 @@ class OpenAIClient(private val apiKey: String) {
         }
     }
 
-    private fun getWeatherTools(): JSONArray {
-        return JSONArray().apply {
-            put(
-                JSONObject().apply {
-                    put("type", "function")
-                    put(
-                        "function",
-                        JSONObject().apply {
-                            put("name", "get_weather")
-                            put("description", "Get the current weather in a given location")
-                            put(
-                                "parameters",
-                                JSONObject().apply {
-                                    put("type", "object")
-                                    put(
-                                        "properties",
-                                        JSONObject().apply {
-                                            put(
-                                                "location",
-                                                JSONObject().apply {
-                                                    put("type", "string")
-                                                    put("description", "The city and state, e.g. San Francisco, CA")
-                                                },
-                                            )
-                                        },
-                                    )
-                                    put("required", JSONArray().apply { put("location") })
-                                },
-                            )
-                        },
-                    )
-                },
-            )
-        }
+    private fun getWeatherTools(): JSONArray = JSONArray().apply {
+        put(
+            JSONObject().apply {
+                put("type", "function")
+                put(
+                    "function",
+                    JSONObject().apply {
+                        put("name", "get_weather")
+                        put("description", "Get the current weather in a given location")
+                        put(
+                            "parameters",
+                            JSONObject().apply {
+                                put("type", "object")
+                                put(
+                                    "properties",
+                                    JSONObject().apply {
+                                        put(
+                                            "location",
+                                            JSONObject().apply {
+                                                put("type", "string")
+                                                put("description", "The city and state, e.g. San Francisco, CA")
+                                            },
+                                        )
+                                    },
+                                )
+                                put("required", JSONArray().apply { put("location") })
+                            },
+                        )
+                    },
+                )
+            },
+        )
     }
 
     suspend fun createCompletion(

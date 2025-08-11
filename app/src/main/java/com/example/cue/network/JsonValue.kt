@@ -26,43 +26,39 @@ class JsonValue private constructor(private val value: Any?) {
 
 class JsonValueAdapter : JsonAdapter<JsonValue>() {
     @FromJson
-    override fun fromJson(reader: JsonReader): JsonValue {
-        return JsonValue.of(readValue(reader))
-    }
+    override fun fromJson(reader: JsonReader): JsonValue = JsonValue.of(readValue(reader))
 
     @ToJson
     override fun toJson(writer: JsonWriter, value: JsonValue?) {
         writeValue(writer, value?.getRaw())
     }
 
-    private fun readValue(reader: JsonReader): Any? {
-        return when (reader.peek()) {
-            JsonReader.Token.NULL -> reader.nextNull()
-            JsonReader.Token.BOOLEAN -> reader.nextBoolean()
-            JsonReader.Token.NUMBER -> reader.nextDouble()
-            JsonReader.Token.STRING -> reader.nextString()
-            JsonReader.Token.BEGIN_ARRAY -> {
-                val list = mutableListOf<Any?>()
-                reader.beginArray()
-                while (reader.hasNext()) {
-                    list.add(readValue(reader))
-                }
-                reader.endArray()
-                list
+    private fun readValue(reader: JsonReader): Any? = when (reader.peek()) {
+        JsonReader.Token.NULL -> reader.nextNull()
+        JsonReader.Token.BOOLEAN -> reader.nextBoolean()
+        JsonReader.Token.NUMBER -> reader.nextDouble()
+        JsonReader.Token.STRING -> reader.nextString()
+        JsonReader.Token.BEGIN_ARRAY -> {
+            val list = mutableListOf<Any?>()
+            reader.beginArray()
+            while (reader.hasNext()) {
+                list.add(readValue(reader))
             }
-            JsonReader.Token.BEGIN_OBJECT -> {
-                val map = mutableMapOf<String, Any?>()
-                reader.beginObject()
-                while (reader.hasNext()) {
-                    val name = reader.nextName()
-                    val value = readValue(reader)
-                    map[name] = value
-                }
-                reader.endObject()
-                map
-            }
-            else -> throw JsonDataException("Unexpected token: ${reader.peek()}")
+            reader.endArray()
+            list
         }
+        JsonReader.Token.BEGIN_OBJECT -> {
+            val map = mutableMapOf<String, Any?>()
+            reader.beginObject()
+            while (reader.hasNext()) {
+                val name = reader.nextName()
+                val value = readValue(reader)
+                map[name] = value
+            }
+            reader.endObject()
+            map
+        }
+        else -> throw JsonDataException("Unexpected token: ${reader.peek()}")
     }
 
     private fun writeValue(writer: JsonWriter, value: Any?) {

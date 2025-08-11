@@ -81,7 +81,5 @@ class ClientStatusService @Inject constructor(
         }
     }
 
-    fun getClientStatus(assistantId: String): ClientStatus? {
-        return _clientStatuses.value.values.find { it.assistantId == assistantId }
-    }
+    fun getClientStatus(assistantId: String): ClientStatus? = _clientStatuses.value.values.find { it.assistantId == assistantId }
 }

@@ -29,16 +29,15 @@ class AssistantRepository @Inject constructor(
                 _assistants.value = assistants
             }
     }
-    suspend fun getAssistants(skip: Int = 0, limit: Int = 20): Result<List<Assistant>> =
-        runCatching {
-            val jsonResponse: String = networkClient.get("/assistants?skip=$skip&limit=$limit")
+    suspend fun getAssistants(skip: Int = 0, limit: Int = 20): Result<List<Assistant>> = runCatching {
+        val jsonResponse: String = networkClient.get("/assistants?skip=$skip&limit=$limit")
 
-            val type = Types.newParameterizedType(List::class.java, Assistant::class.java)
-            val adapter = moshi.adapter<List<Assistant>>(type)
+        val type = Types.newParameterizedType(List::class.java, Assistant::class.java)
+        val adapter = moshi.adapter<List<Assistant>>(type)
 
-            adapter.fromJson(jsonResponse)
-                ?: throw NetworkError.ParseError("Failed to parse assistants")
-        }
+        adapter.fromJson(jsonResponse)
+            ?: throw NetworkError.ParseError("Failed to parse assistants")
+    }
 
     suspend fun getAssistant(id: String): Result<Assistant> = runCatching {
         networkClient.get(

@@ -36,48 +36,42 @@ object NetworkModule {
     @Singleton
     fun provideSharedPreferences(
         @ApplicationContext context: Context,
-    ): SharedPreferences {
-        return context.getSharedPreferences("CuePreferences", Context.MODE_PRIVATE)
-    }
+    ): SharedPreferences = context.getSharedPreferences("CuePreferences", Context.MODE_PRIVATE)
 
     @Provides
     @Singleton
-    fun provideMoshi(): Moshi {
-        return Moshi.Builder()
-            .add(Unit::class.java, UnitAdapter())
-            .add(JsonValueAdapter())
-            .add(InstantAdapter())
-            .add(KotlinJsonAdapterFactory())
-            .build()
-    }
+    fun provideMoshi(): Moshi = Moshi.Builder()
+        .add(Unit::class.java, UnitAdapter())
+        .add(JsonValueAdapter())
+        .add(InstantAdapter())
+        .add(KotlinJsonAdapterFactory())
+        .build()
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor { chain ->
-                try {
-                    chain.proceed(chain.request())
-                } catch (e: Exception) {
-                    throw NetworkError.NetworkFailure(
-                        message = "Network request failed: ${e.localizedMessage}",
-                    )
-                }
+    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor { chain ->
+            try {
+                chain.proceed(chain.request())
+            } catch (e: Exception) {
+                throw NetworkError.NetworkFailure(
+                    message = "Network request failed: ${e.localizedMessage}",
+                )
             }
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = if (BuildConfig.DEBUG) {
-                        HttpLoggingInterceptor.Level.BODY
-                    } else {
-                        HttpLoggingInterceptor.Level.NONE
-                    }
-                },
-            )
-            .build()
-    }
+        }
+        .addInterceptor(
+            HttpLoggingInterceptor().apply {
+                level = if (BuildConfig.DEBUG) {
+                    HttpLoggingInterceptor.Level.BODY
+                } else {
+                    HttpLoggingInterceptor.Level.NONE
+                }
+            },
+        )
+        .build()
 
     @Provides
     @Singleton
@@ -102,60 +96,54 @@ object NetworkModule {
         moshi: Moshi,
         @Named("baseUrl") baseUrl: String,
         sharedPreferences: SharedPreferences,
-    ): NetworkClient {
-        return NetworkClientImpl(
-            okHttpClient = okHttpClient,
-            moshi = moshi,
-            baseUrl = baseUrl,
-            sharedPreferences = sharedPreferences,
-        )
-    }
+    ): NetworkClient = NetworkClientImpl(
+        okHttpClient = okHttpClient,
+        moshi = moshi,
+        baseUrl = baseUrl,
+        sharedPreferences = sharedPreferences,
+    )
 
     @Provides
     @Singleton
     @Named("openaiBaseUrl")
-    fun provideOpenAIBaseUrl(): String {
-        return "https://api.openai.com/v1"
-    }
+    fun provideOpenAIBaseUrl(): String = "https://api.openai.com/v1"
 
     @Provides
     @Singleton
     @Named("openaiOkHttpClient")
-    fun provideOpenAIOkHttpClient(sharedPreferences: SharedPreferences): OkHttpClient {
-        return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .addInterceptor { chain ->
-                val apiKey = sharedPreferences.getString(ApiKeyType.OPENAI.key, "") ?: ""
-                if (apiKey.isEmpty()) {
-                    throw NetworkError.NetworkFailure(
-                        message = "OpenAI API key not found in preferences",
-                    )
-                }
-
-                val request = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer $apiKey")
-                    .build()
-                try {
-                    chain.proceed(request)
-                } catch (e: Exception) {
-                    throw NetworkError.NetworkFailure(
-                        message = "Network request failed: ${e.localizedMessage}",
-                    )
-                }
+    fun provideOpenAIOkHttpClient(sharedPreferences: SharedPreferences): OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .addInterceptor { chain ->
+            val apiKey = sharedPreferences.getString(ApiKeyType.OPENAI.key, "") ?: ""
+            if (apiKey.isEmpty()) {
+                throw NetworkError.NetworkFailure(
+                    message = "OpenAI API key not found in preferences",
+                )
             }
-            .addInterceptor(
-                HttpLoggingInterceptor().apply {
-                    level = if (BuildConfig.DEBUG) {
-                        HttpLoggingInterceptor.Level.BODY
-                    } else {
-                        HttpLoggingInterceptor.Level.NONE
-                    }
-                },
-            )
-            .build()
-    }
+
+            val request = chain.request().newBuilder()
+                .addHeader("Authorization", "Bearer $apiKey")
+                .build()
+            try {
+                chain.proceed(request)
+            } catch (e: Exception) {
+                throw NetworkError.NetworkFailure(
+                    message = "Network request failed: ${e.localizedMessage}",
+                )
+            }
+        }
+        .addInterceptor(
+            HttpLoggingInterceptor().apply {
+                level = if (BuildConfig.DEBUG) {
+                    HttpLoggingInterceptor.Level.BODY
+                } else {
+                    HttpLoggingInterceptor.Level.NONE
+                }
+            },
+        )
+        .build()
 
     @Provides
     @Singleton

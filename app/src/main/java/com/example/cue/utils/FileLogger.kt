@@ -39,9 +39,7 @@ class FileLogger @Inject constructor(
         return File(logsDir, fileName)
     }
 
-    fun getLogFilePath(): String {
-        return getLogFile().absolutePath
-    }
+    fun getLogFilePath(): String = getLogFile().absolutePath
 
     private fun writeToFile(level: LogLevel, tag: String, message: String, throwable: Throwable? = null) {
         logScope.launch {
@@ -103,9 +101,7 @@ class FileLogger @Inject constructor(
             }
         }
 
-        fun getInstance(): FileLogger {
-            return instance ?: throw IllegalStateException("FileLogger not initialized. Call initialize() first.")
-        }
+        fun getInstance(): FileLogger = instance ?: throw IllegalStateException("FileLogger not initialized. Call initialize() first.")
     }
 }
 
@@ -162,19 +158,17 @@ object AppLog {
     /**
      * Get the class name of the caller for automatic tagging.
      */
-    private fun getCallerClassName(): String {
-        return try {
-            val stackTrace = Thread.currentThread().stackTrace
-            // Find the first stack element that's not this class or Thread
-            stackTrace.firstOrNull {
-                !it.className.contains("FileLogger") &&
-                    !it.className.contains("Thread") &&
-                    !it.className.contains("VMStack")
-            }?.let { element ->
-                element.className.substringAfterLast('.')
-            } ?: "Unknown"
-        } catch (e: Exception) {
-            "Unknown"
-        }
+    private fun getCallerClassName(): String = try {
+        val stackTrace = Thread.currentThread().stackTrace
+        // Find the first stack element that's not this class or Thread
+        stackTrace.firstOrNull {
+            !it.className.contains("FileLogger") &&
+                !it.className.contains("Thread") &&
+                !it.className.contains("VMStack")
+        }?.let { element ->
+            element.className.substringAfterLast('.')
+        } ?: "Unknown"
+    } catch (e: Exception) {
+        "Unknown"
     }
 }
