@@ -1,6 +1,5 @@
 package com.example.cue.assistant
 
-import android.util.Log
 import com.example.cue.assistant.models.ClientStatus
 import com.example.cue.network.websocket.EventMessage
 import com.example.cue.network.websocket.EventMessageType
@@ -16,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.cue.utils.AppLog as Log
 
 @ActivityRetainedScoped
 class ClientStatusService @Inject constructor(

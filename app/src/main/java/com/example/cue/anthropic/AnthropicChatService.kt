@@ -1,8 +1,8 @@
 package com.example.cue.anthropic
 
-import android.util.Log
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.example.cue.utils.AppLog as Log
 
 private const val TAG = "AnthropicChatService"
 

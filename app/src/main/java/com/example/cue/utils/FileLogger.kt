@@ -65,27 +65,32 @@ class FileLogger @Inject constructor(
     }
 
     fun debug(tag: String, message: String) {
-        Log.d(tag, message)
-        writeToFile(LogLevel.DEBUG, tag, message)
+        val prefixedTag = "${LOG_TAG_PREFIX}$tag"
+        Log.d(prefixedTag, message)
+        writeToFile(LogLevel.DEBUG, prefixedTag, message)
     }
 
     fun info(tag: String, message: String) {
-        Log.i(tag, message)
-        writeToFile(LogLevel.INFO, tag, message)
+        val prefixedTag = "${LOG_TAG_PREFIX}$tag"
+        Log.i(prefixedTag, message)
+        writeToFile(LogLevel.INFO, prefixedTag, message)
     }
 
     fun warn(tag: String, message: String, throwable: Throwable? = null) {
-        Log.w(tag, message, throwable)
-        writeToFile(LogLevel.WARN, tag, message, throwable)
+        val prefixedTag = "${LOG_TAG_PREFIX}$tag"
+        Log.w(prefixedTag, message, throwable)
+        writeToFile(LogLevel.WARN, prefixedTag, message, throwable)
     }
 
     fun error(tag: String, message: String, throwable: Throwable? = null) {
-        Log.e(tag, message, throwable)
-        writeToFile(LogLevel.ERROR, tag, message, throwable)
+        val prefixedTag = "${LOG_TAG_PREFIX}$tag"
+        Log.e(prefixedTag, message, throwable)
+        writeToFile(LogLevel.ERROR, prefixedTag, message, throwable)
     }
 
     companion object {
         private const val TAG = "FileLogger"
+        private const val LOG_TAG_PREFIX = "[AppLog]"
 
         // Convenience methods for when dependency injection is not available
         @Volatile
@@ -105,70 +110,70 @@ class FileLogger @Inject constructor(
     }
 }
 
-// AppLog object for simplified logging interface
 object AppLog {
-    /**
-     * Log debug message. Automatically uses caller's class name as tag.
-     */
-    fun debug(message: String) {
-        val tag = getCallerClassName()
+    @JvmStatic
+    fun d(tag: String?, msg: String): Int {
+        val safeTag = tag ?: ""
         try {
-            FileLogger.getInstance().debug(tag, message)
+            FileLogger.getInstance().debug(safeTag, msg)
         } catch (e: Exception) {
-            Log.d(tag, message)
+            Log.d(safeTag, msg)
         }
+        return msg.length
     }
 
-    /**
-     * Log info message. Automatically uses caller's class name as tag.
-     */
-    fun info(message: String) {
-        val tag = getCallerClassName()
+    @JvmStatic
+    fun i(tag: String?, msg: String): Int {
+        val safeTag = tag ?: ""
         try {
-            FileLogger.getInstance().info(tag, message)
+            FileLogger.getInstance().info(safeTag, msg)
         } catch (e: Exception) {
-            Log.i(tag, message)
+            Log.i(safeTag, msg)
         }
+        return msg.length
     }
 
-    /**
-     * Log warning message. Automatically uses caller's class name as tag.
-     */
-    fun warn(message: String, throwable: Throwable? = null) {
-        val tag = getCallerClassName()
+    @JvmStatic
+    fun w(tag: String?, msg: String): Int {
+        val safeTag = tag ?: ""
         try {
-            FileLogger.getInstance().warn(tag, message, throwable)
+            FileLogger.getInstance().warn(safeTag, msg)
         } catch (e: Exception) {
-            Log.w(tag, message, throwable)
+            Log.w(safeTag, msg)
         }
+        return msg.length
     }
 
-    /**
-     * Log error message. Automatically uses caller's class name as tag.
-     */
-    fun error(message: String, throwable: Throwable? = null) {
-        val tag = getCallerClassName()
+    @JvmStatic
+    fun w(tag: String?, msg: String, tr: Throwable?): Int {
+        val safeTag = tag ?: ""
         try {
-            FileLogger.getInstance().error(tag, message, throwable)
+            FileLogger.getInstance().warn(safeTag, msg, tr)
         } catch (e: Exception) {
-            Log.e(tag, message, throwable)
+            Log.w(safeTag, msg, tr)
         }
+        return msg.length
     }
 
-    /**
-     * Get the class name of the caller for automatic tagging.
-     */
-    private fun getCallerClassName(): String = try {
-        val stackTrace = Thread.currentThread().stackTrace
-        // Find the first stack element that's not this class or Thread
-        stackTrace.firstOrNull {
-            !it.className.contains("FileLogger") &&
-                !it.className.contains("Thread") &&
-                !it.className.contains("VMStack")
-        }?.let { element ->
-            element.className.substringAfterLast('.')
-        } ?: "Unknown"
-    } catch (e: Exception) {
-        "Unknown"
+    @JvmStatic
+    fun e(tag: String?, msg: String): Int {
+        val safeTag = tag ?: ""
+        try {
+            FileLogger.getInstance().error(safeTag, msg)
+        } catch (e: Exception) {
+            Log.e(safeTag, msg)
+        }
+        return msg.length
+    }
+
+    @JvmStatic
+    fun e(tag: String?, msg: String, tr: Throwable?): Int {
+        val safeTag = tag ?: ""
+        try {
+            FileLogger.getInstance().error(safeTag, msg, tr)
+        } catch (e: Exception) {
+            Log.e(safeTag, msg, tr)
+        }
+        return msg.length
     }
 }

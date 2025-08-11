@@ -1,7 +1,6 @@
 package com.example.cue.anthropic
 
 import android.content.SharedPreferences
-import android.util.Log
 import com.example.cue.network.ErrorResponseParser
 import com.example.cue.settings.apikeys.ApiKeyType
 import kotlinx.coroutines.Dispatchers
@@ -11,6 +10,7 @@ import org.json.JSONObject
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import com.example.cue.utils.AppLog as Log
 
 class AnthropicClient(
     private val accessToken: String,

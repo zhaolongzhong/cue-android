@@ -1,7 +1,6 @@
 package com.example.cue.debug
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.cue.utils.AppLog as Log
 
 data class DebugUiState(
     val currentProvider: Provider = Provider.ANTHROPIC,

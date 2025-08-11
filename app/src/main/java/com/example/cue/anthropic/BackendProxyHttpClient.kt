@@ -1,7 +1,6 @@
 package com.example.cue.anthropic
 
 import android.content.SharedPreferences
-import android.util.Log
 import com.anthropic.core.RequestOptions
 import com.anthropic.core.http.Headers
 import com.anthropic.core.http.HttpClient
@@ -16,6 +15,7 @@ import java.io.ByteArrayInputStream
 import java.io.InputStream
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import com.example.cue.utils.AppLog as Log
 
 /**
  * Custom HttpClient that proxies Anthropic SDK requests to our backend server

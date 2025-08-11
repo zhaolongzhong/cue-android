@@ -2,7 +2,6 @@ package com.example.cue.di
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import com.example.cue.BuildConfig
 import com.example.cue.Environment
 import com.example.cue.anthropic.AnthropicClient
@@ -27,6 +26,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import java.util.concurrent.TimeUnit
 import javax.inject.Named
 import javax.inject.Singleton
+import com.example.cue.utils.AppLog as Log
 
 @Module
 @InstallIn(SingletonComponent::class)

@@ -5,12 +5,12 @@ import com.example.cue.auth.models.TokenResponse
 import com.example.cue.auth.models.User
 import com.example.cue.network.NetworkClient
 import com.example.cue.network.NetworkError
-import com.example.cue.utils.AppLog
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.example.cue.utils.AppLog as Log
 
 private const val TAG = "AuthService"
 
@@ -34,7 +34,7 @@ class AuthService @Inject constructor(
     }
 
     suspend fun login(email: String, password: String): String {
-        AppLog.info("AuthService.login() - Attempting login for user: $email")
+        Log.i("AuthService", "login() - Attempting login for user: $email")
         return try {
             val response = networkClient.postFormUrlEncoded<TokenResponse>(
                 "/accounts/login",
@@ -46,7 +46,7 @@ class AuthService @Inject constructor(
                 TokenResponse::class.java,
             )
 
-            AppLog.info("AuthService.login() - Login successful, saving token")
+            Log.i("AuthService", "login() - Login successful, saving token")
             tokenManager.saveAccessToken(response.accessToken)
             _isAuthenticated.value = true
             fetchUserProfile()
@@ -59,7 +59,7 @@ class AuthService @Inject constructor(
                     throw AuthError.NetworkError
                 }
                 else -> {
-                    AppLog.error("Login error", e)
+                    Log.e("AuthService", "Login error", e)
                     throw AuthError.NetworkError
                 }
             }
@@ -86,7 +86,7 @@ class AuthService @Inject constructor(
                     throw AuthError.NetworkError
                 }
                 else -> {
-                    AppLog.error("Signup error", e)
+                    Log.e("AuthService", "Signup error", e)
                     throw AuthError.NetworkError
                 }
             }
@@ -98,16 +98,16 @@ class AuthService @Inject constructor(
             "/accounts/me",
             User::class.java,
         )
-        AppLog.debug("fetchUserProfile userid: ${user.email}")
+        Log.d("AuthService", "fetchUserProfile userid: ${user.email}")
         _currentUser.value = user
         user
     } catch (e: Exception) {
-        AppLog.error("Fetch user profile error", e)
+        Log.e("AuthService", "Fetch user profile error", e)
         null
     }
 
     fun logout() {
-        AppLog.debug("AuthService logout")
+        Log.d("AuthService", "logout")
         _isAuthenticated.value = false
         tokenManager.clearTokens()
         _currentUser.value = null

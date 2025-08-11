@@ -1,6 +1,5 @@
 package com.example.cue.chat.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -20,6 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
+import com.example.cue.utils.AppLog as Log
 
 @HiltViewModel
 class AssistantChatViewModel @Inject constructor(

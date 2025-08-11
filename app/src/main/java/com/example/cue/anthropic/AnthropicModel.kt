@@ -1,7 +1,6 @@
 package com.example.cue.anthropic
 
 import android.content.SharedPreferences
-import android.util.Log
 import com.anthropic.client.AnthropicClient
 import com.anthropic.client.AnthropicClientImpl
 import com.anthropic.client.okhttp.AnthropicOkHttpClient
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import com.example.cue.utils.AppLog as Log
 
 class AnthropicModel(
     private val apiKeyProvider: (() -> String?)? = null,

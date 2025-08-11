@@ -1,6 +1,5 @@
 package com.example.cue.openai
 
-import android.util.Log
 import com.example.cue.network.ErrorResponseParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -10,6 +9,7 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.random.Random
+import com.example.cue.utils.AppLog as Log
 
 class OpenAIClient(private val apiKey: String) {
     private val baseUrl = "https://api.openai.com/v1"

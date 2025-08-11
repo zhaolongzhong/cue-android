@@ -1,7 +1,6 @@
 package com.example.cue.network.websocket
 
 import android.content.SharedPreferences
-import android.util.Log
 import com.example.cue.Environment
 import com.squareup.moshi.Moshi
 import dagger.hilt.android.scopes.ActivityRetainedScoped
@@ -26,6 +25,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import kotlin.math.min
 import kotlin.math.pow
+import com.example.cue.utils.AppLog as Log
 
 @ActivityRetainedScoped
 class WebSocketService @Inject constructor(

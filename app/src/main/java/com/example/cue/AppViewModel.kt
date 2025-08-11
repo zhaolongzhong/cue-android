@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.cue.assistant.ClientStatusService
 import com.example.cue.auth.AuthService
 import com.example.cue.network.websocket.WebSocketService
-import com.example.cue.utils.AppLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,6 +13,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import com.example.cue.utils.AppLog as Log
 
 @HiltViewModel
 class AppViewModel @Inject constructor(
@@ -35,7 +35,7 @@ class AppViewModel @Inject constructor(
         viewModelScope.launch {
             authService.isAuthenticated
                 .onEach { isAuthenticated ->
-                    AppLog.debug("Auth state changed - authenticated: $isAuthenticated, foreground: $isAppInForeground")
+                    Log.d("AppViewModel", "Auth state changed - authenticated: $isAuthenticated, foreground: $isAppInForeground")
                     if (isAuthenticated && isAppInForeground) {
                         authService.fetchUserProfile()
                         connectWebSocket()
@@ -53,10 +53,10 @@ class AppViewModel @Inject constructor(
     }
 
     fun onAppForeground() {
-        AppLog.info("AppViewModel onAppForeground() - App came to foreground")
+        Log.i("AppViewModel", "onAppForeground() - App came to foreground")
         isAppInForeground = true
         if (authService.isAuthenticated.value) {
-            AppLog.debug("User authenticated, fetching profile and connecting WebSocket")
+            Log.d("AppViewModel", "User authenticated, fetching profile and connecting WebSocket")
             viewModelScope.launch {
                 authService.fetchUserProfile()
             }
@@ -65,7 +65,7 @@ class AppViewModel @Inject constructor(
     }
 
     fun onAppBackground() {
-        AppLog.info("AppViewModel onAppBackground() - App went to background")
+        Log.i("AppViewModel", "onAppBackground() - App went to background")
         isAppInForeground = false
         disconnectWebSocket()
     }
