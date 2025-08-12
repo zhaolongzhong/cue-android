@@ -51,7 +51,7 @@ class ClientStatusService @Inject constructor(
     }
 
     private fun handleClientStatusMessage(message: EventMessage) {
-        val payload = message.payload.payload
+        val payload = message.payload?.payload
         Log.d(TAG, "Receive client status: $payload")
         if (payload != null) {
             val runnerId = (payload["runner_id"] as? String)

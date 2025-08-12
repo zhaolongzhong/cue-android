@@ -134,12 +134,43 @@ class WebSocketService @Inject constructor(
                             // Handle pong internally
                         }
 
+                        EventMessageType.PING -> {
+                            // Could respond with pong if needed
+                            Log.d(TAG, "Received ping")
+                        }
+
+                        EventMessageType.AGENT_CONTROL -> {
+                            Log.d(TAG, "Received agent control event")
+                            _events.value = message
+                        }
+
+                        EventMessageType.TASK_STATUS -> {
+                            Log.d(TAG, "Received task status event")
+                            _events.value = message
+                        }
+
+                        EventMessageType.MESSAGE -> {
+                            Log.d(TAG, "Received message event")
+                            _events.value = message
+                        }
+
+                        EventMessageType.MESSAGE_CHUNK -> {
+                            Log.d(TAG, "Received message chunk event")
+                            _events.value = message
+                        }
+
+                        null -> {
+                            Log.w(TAG, "Received message with null type, ignoring: $text")
+                        }
+
                         else -> {
                             _events.value = message
                         }
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Failed to decode message: ${e.message}", e)
+                    // Log the raw message for debugging
+                    Log.d(TAG, "Raw message that failed to decode: $text")
                 }
             }
         }

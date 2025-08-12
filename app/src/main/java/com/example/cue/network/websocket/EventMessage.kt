@@ -31,6 +31,18 @@ enum class EventMessageType {
 
     @Json(name = "error")
     ERROR,
+
+    @Json(name = "message")
+    MESSAGE,
+
+    @Json(name = "message_chunk")
+    MESSAGE_CHUNK,
+
+    @Json(name = "agent_control")
+    AGENT_CONTROL,
+
+    @Json(name = "task_status")
+    TASK_STATUS,
 }
 
 @JsonClass(generateAdapter = true)
@@ -62,8 +74,8 @@ data class MessagePayload(
 
 @JsonClass(generateAdapter = true)
 data class EventMessage(
-    val type: EventMessageType,
-    val payload: MessagePayload,
+    val type: EventMessageType?,
+    val payload: MessagePayload?,
     @Json(name = "client_id")
     val clientId: String?,
     val metadata: Metadata?,
@@ -82,4 +94,59 @@ data class ClientEventPayload(
     @Json(name = "user_id") val userId: String? = null,
     @Json(name = "msg_id") val msgId: String? = null,
     @Json(name = "payload") val payload: JsonValue? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class PingPongEventPayload(
+    @Json(name = "type") val type: String,
+    @Json(name = "message") val message: String? = null,
+    @Json(name = "sender") val sender: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class GenericMessagePayload(
+    @Json(name = "message") val message: String? = null,
+    @Json(name = "sender") val sender: String? = null,
+    @Json(name = "recipient") val recipient: String? = null,
+    @Json(name = "websocket_request_id") val websocketRequestId: String? = null,
+    @Json(name = "metadata") val metadata: Metadata? = null,
+    @Json(name = "user_id") val userId: String? = null,
+    @Json(name = "msg_id") val msgId: String? = null,
+    @Json(name = "payload") val payload: JsonValue? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class AgentControlPayload(
+    @Json(name = "control_type") val controlType: String,
+    @Json(name = "parameters") val parameters: Map<String, Any>? = null,
+    @Json(name = "timestamp") val timestamp: String? = null,
+    @Json(name = "sequence_number") val sequenceNumber: Int? = null,
+    @Json(name = "message") val message: String? = null,
+    @Json(name = "sender") val sender: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class TaskStatusEventPayload(
+    @Json(name = "session_id") val sessionId: String,
+    @Json(name = "message") val message: String? = null,
+    @Json(name = "sender") val sender: String? = null,
+    @Json(name = "websocket_request_id") val websocketRequestId: String? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class MessageChunkEventPayload(
+    @Json(name = "message") val message: String? = null,
+    @Json(name = "sender") val sender: String? = null,
+    @Json(name = "recipient") val recipient: String? = null,
+    @Json(name = "websocket_request_id") val websocketRequestId: String? = null,
+    @Json(name = "metadata") val metadata: Metadata? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class MessageEventPayload(
+    @Json(name = "message") val message: String? = null,
+    @Json(name = "sender") val sender: String? = null,
+    @Json(name = "recipient") val recipient: String? = null,
+    @Json(name = "websocket_request_id") val websocketRequestId: String? = null,
+    @Json(name = "metadata") val metadata: Metadata? = null,
 )
