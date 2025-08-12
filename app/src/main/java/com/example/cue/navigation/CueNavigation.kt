@@ -13,25 +13,23 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.cue.AppViewModel
-import com.example.cue.anthropic.AnthropicChatScreen
 import com.example.cue.assistant.ui.AssistantScreen
 import com.example.cue.auth.ui.LoginScreen
 import com.example.cue.auth.ui.SignUpScreen
 import com.example.cue.chat.AssistantChatScreen
+import com.example.cue.chat.UnifiedChatScreen
 import com.example.cue.debug.DebugScreen
-import com.example.cue.openai.OpenAIChatScreen
 import com.example.cue.settings.SettingsScreen
 import com.example.cue.settings.apikeys.ApiKeysScreen
 
 object Routes {
     const val LOGIN = "login"
     const val SIGNUP = "signup"
-    const val HOME = "home"
+    const val CHAT = "chat"
     const val SETTINGS = "settings"
     const val ASSISTANTS = "assistants"
     const val API_KEYS = "api_keys"
     const val ASSISTANT_CHAT = "assistant_chat/{assistantId}"
-    const val ANTHROPIC_CHAT = "anthropic_chat"
     const val DEBUG = "debug"
     fun assistantChat(assistantId: String) = "assistant_chat/$assistantId"
 }
@@ -45,7 +43,7 @@ fun CueNavigation(
     val isAuthenticated by viewModel.isAuthenticated.collectAsState()
     NavHost(
         navController = navController,
-        startDestination = if (isAuthenticated) Routes.HOME else Routes.LOGIN,
+        startDestination = if (isAuthenticated) Routes.CHAT else Routes.LOGIN,
         modifier = modifier,
     ) {
         authGraph(navController)
@@ -60,7 +58,7 @@ fun NavGraphBuilder.authGraph(navController: NavController) {
                 navController.navigate(Routes.SIGNUP)
             },
             onLoginSuccess = {
-                navController.navigate(Routes.HOME) {
+                navController.navigate(Routes.CHAT) {
                     popUpTo(Routes.LOGIN) { inclusive = true }
                 }
             },
@@ -72,7 +70,7 @@ fun NavGraphBuilder.authGraph(navController: NavController) {
                 navController.popBackStack()
             },
             onSignUpSuccess = {
-                navController.navigate(Routes.HOME) {
+                navController.navigate(Routes.CHAT) {
                     popUpTo(Routes.SIGNUP) { inclusive = true }
                 }
             },
@@ -81,8 +79,8 @@ fun NavGraphBuilder.authGraph(navController: NavController) {
 }
 
 fun NavGraphBuilder.mainGraph(navController: NavController) {
-    composable(Routes.HOME) {
-        OpenAIChatScreen()
+    composable(Routes.CHAT) {
+        UnifiedChatScreen()
     }
     composable(Routes.SETTINGS) {
         SettingsScreen(
@@ -117,9 +115,6 @@ fun NavGraphBuilder.mainGraph(navController: NavController) {
                 navController.popBackStack()
             },
         )
-    }
-    composable(Routes.ANTHROPIC_CHAT) {
-        AnthropicChatScreen()
     }
     composable(Routes.DEBUG) {
         DebugScreen(

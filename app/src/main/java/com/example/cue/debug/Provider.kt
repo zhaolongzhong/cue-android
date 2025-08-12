@@ -10,7 +10,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 enum class Provider {
     OPENAI,
     ANTHROPIC,
-    GEMINI,
     CUE,
     ;
 
@@ -18,7 +17,6 @@ enum class Provider {
         get() = when (this) {
             OPENAI -> "OpenAI"
             ANTHROPIC -> "Anthropic"
-            GEMINI -> "Gemini"
             CUE -> "Cue"
         }
 
@@ -26,7 +24,6 @@ enum class Provider {
         get() = when (this) {
             OPENAI -> Icons.Default.Memory
             ANTHROPIC -> Icons.Default.Person
-            GEMINI -> Icons.Default.Cloud
             CUE -> Icons.Default.Android
         }
 
@@ -34,7 +31,6 @@ enum class Provider {
         get() = when (this) {
             OPENAI -> "Direct OpenAI API"
             ANTHROPIC -> "Direct Anthropic API"
-            GEMINI -> "Direct Gemini API"
             CUE -> "Cue Backend Server"
         }
 

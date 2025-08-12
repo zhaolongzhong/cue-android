@@ -106,17 +106,6 @@ fun CueDrawer(
                 }
             }
 
-            HorizontalDivider()
-            DrawerItem(
-                icon = Icons.Default.SmartToy,
-                label = "Anthropic Chat",
-                selected = currentRoute == Routes.ANTHROPIC_CHAT,
-                route = Routes.ANTHROPIC_CHAT,
-                drawerState = drawerState,
-                scope = scope,
-                onNavigate = onNavigate,
-                modifier = Modifier.padding(vertical = 4.dp),
-            )
             DrawerItem(
                 icon = Icons.Default.Settings,
                 label = "Settings",

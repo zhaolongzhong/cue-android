@@ -27,8 +27,8 @@ fun CueBottomNavigation(
                 )
             },
             label = { Text("Chat") },
-            selected = currentRoute == Routes.HOME,
-            onClick = { onNavigate(Routes.HOME) },
+            selected = currentRoute == Routes.CHAT,
+            onClick = { onNavigate(Routes.CHAT) },
         )
         NavigationBarItem(
             icon = {

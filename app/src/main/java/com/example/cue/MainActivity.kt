@@ -8,23 +8,38 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.cue.assistant.viewmodel.DrawerAssistantViewModel
+import com.example.cue.debug.DebugBottomSheetContent
+import com.example.cue.debug.DebugViewModel
+import com.example.cue.debug.Provider
 import com.example.cue.navigation.CueNavigation
 import com.example.cue.navigation.Routes
 import com.example.cue.ui.components.CueDrawer
@@ -69,6 +84,18 @@ class MainActivity : ComponentActivity() {
                 val currentRoute =
                     navController.currentBackStackEntryAsState().value?.destination?.route
 
+                val debugViewModel: DebugViewModel = hiltViewModel()
+                val debugUiState by debugViewModel.uiState.collectAsStateWithLifecycle()
+
+                var showDebugBottomSheet by remember { mutableStateOf(false) }
+                val bottomSheetState = rememberModalBottomSheetState(
+                    skipPartiallyExpanded = true,
+                )
+
+                LaunchedEffect(Unit) {
+                    debugViewModel.loadCurrentProvider()
+                }
+
                 ModalNavigationDrawer(
                     drawerState = drawerState,
                     drawerContent = {
@@ -78,8 +105,8 @@ class MainActivity : ComponentActivity() {
                             scope = scope,
                             onNavigate = { route ->
                                 navController.navigate(route) {
-                                    popUpTo(Routes.HOME) {
-                                        inclusive = route == Routes.HOME
+                                    popUpTo(Routes.CHAT) {
+                                        inclusive = route == Routes.CHAT
                                     }
                                 }
                             },
@@ -97,11 +124,10 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.fillMaxSize(),
                         topBar = {
                             if (currentRoute != null && currentRoute in listOf(
-                                    Routes.HOME,
+                                    Routes.CHAT,
                                     Routes.ASSISTANTS,
                                     Routes.SETTINGS,
                                     Routes.ASSISTANT_CHAT,
-                                    Routes.ANTHROPIC_CHAT,
                                 )
                             ) {
                                 TopAppBar(
@@ -109,7 +135,7 @@ class MainActivity : ComponentActivity() {
                                         Text(
                                             when {
                                                 currentRoute.startsWith(Routes.ASSISTANT_CHAT) -> "Chat"
-                                                currentRoute == Routes.ANTHROPIC_CHAT -> "Anthropic Chat"
+                                                currentRoute == Routes.CHAT -> "${debugUiState.currentProvider.displayName} Chat"
                                                 else -> currentRoute.replaceFirstChar { it.uppercase() }
                                             },
                                         )
@@ -119,6 +145,15 @@ class MainActivity : ComponentActivity() {
                                             Icon(Icons.Default.Menu, contentDescription = "Menu")
                                         }
                                     },
+                                    actions = {
+                                        IconButton(onClick = { showDebugBottomSheet = true }) {
+                                            Icon(
+                                                imageVector = Icons.Default.BugReport,
+                                                contentDescription = "AI Provider Settings",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                            )
+                                        }
+                                    },
                                 )
                             }
                         },
@@ -126,6 +161,29 @@ class MainActivity : ComponentActivity() {
                         CueNavigation(
                             navController = navController,
                             modifier = Modifier.padding(innerPadding),
+                        )
+                    }
+                }
+
+                if (showDebugBottomSheet) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showDebugBottomSheet = false },
+                        sheetState = bottomSheetState,
+                        dragHandle = { BottomSheetDefaults.DragHandle() },
+                    ) {
+                        DebugBottomSheetContent(
+                            viewModel = debugViewModel,
+                            onProviderSelected = { provider ->
+                                showDebugBottomSheet = false
+                                val targetRoute = when (provider) {
+                                    Provider.OPENAI -> Routes.CHAT
+                                    Provider.ANTHROPIC -> Routes.CHAT
+                                    Provider.CUE -> Routes.CHAT
+                                }
+                                navController.navigate(targetRoute) {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            },
                         )
                     }
                 }
