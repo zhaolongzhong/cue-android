@@ -63,7 +63,8 @@ fun OpenAIChatScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp),
     ) {
         LazyColumn(
             modifier = Modifier
