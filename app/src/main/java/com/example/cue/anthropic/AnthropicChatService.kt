@@ -10,14 +10,21 @@ private const val TAG = "AnthropicChatService"
 class AnthropicChatService @Inject constructor(
     private val anthropicClient: AnthropicClient,
     private val anthropicModel: AnthropicModel,
+    private val anthropicChatServiceV2: AnthropicChatServiceV2,
 ) {
+    private val useV2 = true // Toggle this to test V2
     suspend fun sendMessage(message: String): String = try {
-        Log.d(TAG, "Using AnthropicModel SDK implementation (direct API)")
-        anthropicModel.createCompletion(
-            prompt = message,
-            maxTokens = 1000,
-            temperature = 0.7,
-        )
+        if (useV2) {
+            Log.d(TAG, "Using AnthropicModelV2 implementation")
+            anthropicChatServiceV2.sendMessage(message)
+        } else {
+            Log.d(TAG, "Using AnthropicModel SDK implementation (direct API)")
+            anthropicModel.createCompletion(
+                prompt = message,
+                maxTokens = 1000,
+                temperature = 0.7,
+            )
+        }
     } catch (e: Exception) {
         Log.e(TAG, "Failed to send message", e)
         val errorMessage = when {

@@ -11,10 +11,15 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.BufferedReader
 import java.io.ByteArrayInputStream
 import java.io.InputStream
+import java.io.InputStreamReader
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 import com.example.cue.utils.AppLog as Log
 
 /**
@@ -55,16 +60,43 @@ class BackendProxyHttpClient(
         val okHttpRequest = buildOkHttpRequest(transformedRequest)
         Log.d(TAG, "Executing backend request: ${okHttpRequest.method} ${okHttpRequest.url}")
 
-        okHttpClient.newCall(okHttpRequest).execute().use { okHttpResponse ->
-            Log.d(TAG, "Backend response code: ${okHttpResponse.code}")
+        val okHttpResponse = okHttpClient.newCall(okHttpRequest).execute()
+        Log.d(TAG, "Backend response code: ${okHttpResponse.code}")
 
-            val responseBody = okHttpResponse.body?.string() ?: ""
-            Log.d(TAG, "Backend response body: $responseBody")
+        // Check if this is a streaming request by looking at request path
+        val requestPath = "/" + request.pathSegments.joinToString("/")
+        val isStreamingRequest = requestPath.contains("/messages") && okHttpRequest.method == "POST"
+
+        if (isStreamingRequest) {
+            Log.d(TAG, "Detected streaming request - passing through SSE stream directly")
+
+            val bodyStream = okHttpResponse.body?.byteStream()
+            if (bodyStream == null) {
+                Log.w(TAG, "Response body stream is null")
+                return BackendHttpResponse(
+                    statusCode = okHttpResponse.code,
+                    headers = convertOkHttpHeadersToSdkHeaders(okHttpResponse.headers),
+                    body = ByteArrayInputStream(byteArrayOf()),
+                )
+            }
+
+            // For streaming requests, pass through the SSE stream directly to the SDK
             return BackendHttpResponse(
                 statusCode = okHttpResponse.code,
                 headers = convertOkHttpHeadersToSdkHeaders(okHttpResponse.headers),
-                body = ByteArrayInputStream(responseBody.toByteArray()),
+                body = bodyStream,
             )
+        } else {
+            // For non-streaming requests, read the full body as before
+            okHttpResponse.use { response ->
+                val responseBody = response.body?.string() ?: ""
+                Log.d(TAG, "Backend response body: $responseBody")
+                return BackendHttpResponse(
+                    statusCode = response.code,
+                    headers = convertOkHttpHeadersToSdkHeaders(response.headers),
+                    body = ByteArrayInputStream(responseBody.toByteArray()),
+                )
+            }
         }
     }
 
