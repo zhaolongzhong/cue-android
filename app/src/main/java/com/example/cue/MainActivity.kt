@@ -128,6 +128,7 @@ class MainActivity : ComponentActivity() {
                                     Routes.ASSISTANTS,
                                     Routes.SETTINGS,
                                     Routes.ASSISTANT_CHAT,
+                                    Routes.SESSION_CHAT,
                                 )
                             ) {
                                 TopAppBar(
@@ -136,6 +137,7 @@ class MainActivity : ComponentActivity() {
                                             when {
                                                 currentRoute.startsWith(Routes.ASSISTANT_CHAT) -> "Chat"
                                                 currentRoute == Routes.CHAT -> "${debugUiState.currentProvider.displayName} Chat"
+                                                currentRoute == Routes.SESSION_CHAT -> "CLI Session Chat"
                                                 else -> currentRoute.replaceFirstChar { it.uppercase() }
                                             },
                                         )

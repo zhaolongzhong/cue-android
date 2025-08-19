@@ -75,7 +75,7 @@ data class MessagePayload(
 @JsonClass(generateAdapter = true)
 data class EventMessage(
     val type: EventMessageType?,
-    val payload: MessagePayload?,
+    val payload: Any?,
     @Json(name = "client_id")
     val clientId: String?,
     val metadata: Metadata?,

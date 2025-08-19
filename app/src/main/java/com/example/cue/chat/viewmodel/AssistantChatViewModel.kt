@@ -67,8 +67,8 @@ class AssistantChatViewModel @Inject constructor(
                 .filterNotNull()
                 .collect { event ->
                     when (event.type) {
-                        EventMessageType.ASSISTANT -> event.payload?.let { handleAssistantMessage(it) }
-                        EventMessageType.USER -> event.payload?.let { handleUserMessage(it) }
+                        EventMessageType.ASSISTANT -> (event.payload as? com.example.cue.network.websocket.MessagePayload)?.let { handleAssistantMessage(it) }
+                        EventMessageType.USER -> (event.payload as? com.example.cue.network.websocket.MessagePayload)?.let { handleUserMessage(it) }
                         else -> Unit // Ignore other events
                     }
                 }

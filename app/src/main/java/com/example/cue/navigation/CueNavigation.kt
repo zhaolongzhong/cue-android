@@ -21,6 +21,7 @@ import com.example.cue.chat.UnifiedChatScreen
 import com.example.cue.debug.DebugScreen
 import com.example.cue.settings.SettingsScreen
 import com.example.cue.settings.apikeys.ApiKeysScreen
+import com.example.cue.ui.session.CLISessionScreen
 
 object Routes {
     const val LOGIN = "login"
@@ -31,6 +32,7 @@ object Routes {
     const val API_KEYS = "api_keys"
     const val ASSISTANT_CHAT = "assistant_chat/{assistantId}"
     const val DEBUG = "debug"
+    const val SESSION_CHAT = "session_chat"
     fun assistantChat(assistantId: String) = "assistant_chat/$assistantId"
 }
 
@@ -122,5 +124,8 @@ fun NavGraphBuilder.mainGraph(navController: NavController) {
                 navController.popBackStack()
             },
         )
+    }
+    composable(Routes.SESSION_CHAT) {
+        CLISessionScreen()
     }
 }
