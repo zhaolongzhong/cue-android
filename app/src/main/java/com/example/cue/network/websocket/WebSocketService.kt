@@ -103,6 +103,128 @@ class WebSocketService @Inject constructor(
         webSocket?.send(json)
     }
 
+    fun sendClaudeCodeRequest(prompt: String, sessionId: String? = null, workingDirectory: String = "~"): String {
+        val requestId = "req_${UUID.randomUUID()}"
+        val parameters = mutableMapOf<String, Any>(
+            "prompt" to prompt,
+            "working_directory" to workingDirectory,
+        )
+        sessionId?.let { parameters["session_id"] = it }
+
+        // Create the agent control payload directly in the format expected by backend
+        val agentControlJson = mapOf(
+            "type" to "agent_control",
+            "payload" to mapOf(
+                "control_type" to "claude_code_execute",
+                "parameters" to parameters,
+                "timestamp" to System.currentTimeMillis().toString(),
+                "sender" to environment.clientId,
+                "recipient" to "all",
+            ),
+            "client_id" to environment.clientId,
+            "websocket_request_id" to requestId,
+        )
+
+        // Send as raw JSON
+        val json = moshi.adapter<Map<String, Any>>(Map::class.java).toJson(agentControlJson)
+
+        Log.d(TAG, "Sending Claude Code JSON: $json")
+
+        val success = webSocket?.send(json) ?: false
+
+        Log.d(TAG, "Claude Code request sent: $prompt (success: $success, requestId: $requestId)")
+        return requestId
+    }
+
+    fun sendCueCLIRequest(message: String, sessionId: String, workingDirectory: String = "~", targetClientId: String? = null): String {
+        val requestId = "req_${UUID.randomUUID()}"
+        val parameters = mutableMapOf<String, Any>(
+            "message" to message,
+            "working_directory" to workingDirectory,
+            "session_id" to sessionId,
+        )
+
+        // Create the agent control payload for Cue CLI
+        val agentControlJson = mapOf(
+            "type" to "agent_control",
+            "payload" to mapOf(
+                "control_type" to "cue_cli_execute",
+                "parameters" to parameters,
+                "timestamp" to System.currentTimeMillis().toString(),
+                "sender" to environment.clientId,
+                "recipient" to (targetClientId ?: "all"),
+                "target_client_id" to targetClientId,
+            ),
+            "client_id" to environment.clientId,
+            "websocket_request_id" to requestId,
+        )
+
+        // Send as raw JSON
+        val json = moshi.adapter<Map<String, Any>>(Map::class.java).toJson(agentControlJson)
+
+        Log.d(TAG, "Sending Cue CLI JSON to ${targetClientId ?: "all"}: $json")
+
+        val success = webSocket?.send(json) ?: false
+
+        Log.d(TAG, "Cue CLI request sent: $message (target: ${targetClientId ?: "all"}, success: $success, requestId: $requestId)")
+        return requestId
+    }
+
+    fun createSession(sessionId: String, workingDirectory: String = "~"): String {
+        val requestId = "req_${UUID.randomUUID()}"
+        val parameters = mapOf<String, Any>(
+            "session_id" to sessionId,
+            "working_directory" to workingDirectory,
+        )
+
+        // Create the agent control payload directly in the format expected by backend
+        val agentControlJson = mapOf(
+            "type" to "agent_control",
+            "payload" to mapOf(
+                "control_type" to "create_session",
+                "parameters" to parameters,
+                "timestamp" to System.currentTimeMillis().toString(),
+                "sender" to environment.clientId,
+                "recipient" to "all",
+            ),
+            "client_id" to environment.clientId,
+            "websocket_request_id" to requestId,
+        )
+
+        // Send as raw JSON
+        val json = moshi.adapter<Map<String, Any>>(Map::class.java).toJson(agentControlJson)
+        webSocket?.send(json)
+
+        Log.d(TAG, "Sent session creation request: $sessionId")
+        return requestId
+    }
+
+    fun requestClientsList(): String {
+        val requestId = "req_${UUID.randomUUID()}"
+
+        // Send ping message to request clients list (following core WebSocketClient pattern)
+        val pingJson = mapOf(
+            "type" to "ping",
+            "payload" to mapOf(
+                "type" to "request_clients",
+                "message" to "Requesting client list",
+                "client_id" to environment.clientId,
+                "recipient" to "all",
+            ),
+            "client_id" to environment.clientId,
+            "websocket_request_id" to requestId,
+        )
+
+        // Send as raw JSON
+        val json = moshi.adapter<Map<String, Any>>(Map::class.java).toJson(pingJson)
+        val success = webSocket?.send(json) ?: false
+
+        Log.d(TAG, "Sent client list request (success: $success, requestId: $requestId)")
+        return requestId
+    }
+
+    fun getClientId(): String = environment.clientId
+
     private fun createWebSocketListener() = object : WebSocketListener() {
         override fun onOpen(webSocket: WebSocket, response: Response) {
             scope.launch {
@@ -113,10 +235,13 @@ class WebSocketService @Inject constructor(
         }
 
         override fun onMessage(webSocket: WebSocket, text: String) {
-            Log.d(TAG, "Received message: $text")
+            // Log only first 500 chars to avoid huge logs
+            val logText = if (text.length > 500) text.substring(0, 500) + "..." else text
+            Log.d(TAG, "Received raw message: $logText")
             scope.launch {
                 try {
                     val message = eventMessageAdapter.fromJson(text)
+                    Log.d(TAG, "Parsed message type: ${message?.type}, clientId: ${message?.clientId}")
                     when (message?.type) {
                         EventMessageType.CLIENT_STATUS -> {
                             _events.value = message
@@ -135,22 +260,26 @@ class WebSocketService @Inject constructor(
                         }
 
                         EventMessageType.PING -> {
-                            // Could respond with pong if needed
-                            Log.d(TAG, "Received ping")
+                            // Handle ping requests for client discovery
+                            Log.d(TAG, "Received ping message: ${message.payload}")
+                            handlePingMessage(message)
+                            // Also emit the ping event so ViewModel can see client_info responses
+                            _events.value = message
                         }
 
                         EventMessageType.AGENT_CONTROL -> {
-                            Log.d(TAG, "Received agent control event")
+                            Log.d(TAG, "Received agent control event from client: ${message.clientId}")
+                            Log.d(TAG, "Agent control payload type: ${message.payload?.javaClass?.simpleName}")
                             _events.value = message
                         }
 
                         EventMessageType.TASK_STATUS -> {
-                            Log.d(TAG, "Received task status event")
+                            Log.d(TAG, "Received task status event: $message")
                             _events.value = message
                         }
 
                         EventMessageType.MESSAGE -> {
-                            Log.d(TAG, "Received message event")
+                            Log.d(TAG, "Received message event: $message")
                             _events.value = message
                         }
 
@@ -196,6 +325,48 @@ class WebSocketService @Inject constructor(
         }
     }
 
+    private fun handlePingMessage(message: EventMessage) {
+        val payload = message.payload as? Map<*, *> ?: return
+        val payloadType = payload["type"] as? String
+        val requestingClientId = message.clientId ?: payload["client_id"] as? String
+
+        Log.d(TAG, "Handling ping - type: $payloadType, from: $requestingClientId, our client: ${environment.clientId}")
+
+        when (payloadType) {
+            "request_clients" -> {
+                // Another client is requesting client list, respond with our info
+                if (requestingClientId != environment.clientId) {
+                    Log.d(TAG, "Responding to request_clients from $requestingClientId")
+
+                    val responseJson = mapOf(
+                        "type" to "ping",
+                        "payload" to mapOf(
+                            "type" to "client_info",
+                            "message" to "Client info response",
+                            "client_id" to environment.clientId,
+                            "platform" to "android",
+                            "short_name" to "android-${environment.clientId.take(8)}",
+                            "recipient" to "all",
+                        ),
+                        "client_id" to environment.clientId,
+                    )
+
+                    val json = moshi.adapter<Map<String, Any>>(Map::class.java).toJson(responseJson)
+                    webSocket?.send(json)
+                    Log.d(TAG, "Sent client_info response")
+                }
+            }
+
+            "client_info" -> {
+                // Received client info response - emit as event for discovery
+                if (requestingClientId != environment.clientId) {
+                    Log.d(TAG, "Received client_info from $requestingClientId")
+                    _events.value = message
+                }
+            }
+        }
+    }
+
     private fun scheduleReconnect() {
         reconnectJob?.cancel()
         reconnectJob = scope.launch {
@@ -219,15 +390,10 @@ class WebSocketService @Inject constructor(
                     override fun run() {
                         val pingMessage = EventMessage(
                             type = EventMessageType.PING,
-                            payload = MessagePayload(
+                            payload = PingPongEventPayload(
+                                type = "ping",
                                 message = "ping",
                                 sender = "client",
-                                recipient = null,
-                                websocketRequestId = UUID.randomUUID().toString(),
-                                metadata = null,
-                                userId = "",
-                                msgId = null,
-                                payload = null,
                             ),
                             clientId = null,
                             metadata = null,

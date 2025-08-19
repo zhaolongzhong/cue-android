@@ -43,6 +43,9 @@ enum class EventMessageType {
 
     @Json(name = "task_status")
     TASK_STATUS,
+
+    @Json(name = "session")
+    SESSION,
 }
 
 @JsonClass(generateAdapter = true)
@@ -75,12 +78,14 @@ data class MessagePayload(
 @JsonClass(generateAdapter = true)
 data class EventMessage(
     val type: EventMessageType?,
-    val payload: MessagePayload?,
+    val payload: Any?,
     @Json(name = "client_id")
     val clientId: String?,
     val metadata: Metadata?,
     @Json(name = "websocket_request_id")
     val websocketRequestId: String?,
+    @Json(name = "clientInfo")
+    val clientInfo: Any? = null,
 )
 
 @JsonClass(generateAdapter = true)
@@ -149,4 +154,38 @@ data class MessageEventPayload(
     @Json(name = "recipient") val recipient: String? = null,
     @Json(name = "websocket_request_id") val websocketRequestId: String? = null,
     @Json(name = "metadata") val metadata: Metadata? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class SessionEventPayload(
+    @Json(name = "message") val message: String? = null,
+    @Json(name = "sender") val sender: String? = null,
+    @Json(name = "recipient") val recipient: String? = null,
+    @Json(name = "websocket_request_id") val websocketRequestId: String? = null,
+    @Json(name = "metadata") val metadata: Metadata? = null,
+    @Json(name = "payload") val payload: Any? = null,
+    @Json(name = "user_id") val userId: String? = null,
+    @Json(name = "message_id") val messageId: String? = null,
+    @Json(name = "target_client_id") val targetClientId: String? = null,
+    @Json(name = "session_id") val sessionId: String? = null,
+    @Json(name = "action") val action: String? = null,
+    @Json(name = "session_info") val sessionInfo: SessionInfo? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class SessionInfo(
+    @Json(name = "sessionId") val sessionId: String,
+    @Json(name = "clientId") val clientId: String,
+    @Json(name = "messageCount") val messageCount: Int = 0,
+    @Json(name = "maxMessages") val maxMessages: Int = 1,
+    @Json(name = "hasContext") val hasContext: Boolean = false,
+    @Json(name = "currentModel") val currentModel: String? = null,
+    @Json(name = "currentProvider") val currentProvider: String? = null,
+    @Json(name = "agent") val agent: SessionAgent? = null,
+)
+
+@JsonClass(generateAdapter = true)
+data class SessionAgent(
+    @Json(name = "model") val model: String,
+    @Json(name = "maxTurns") val maxTurns: Int = 1,
 )

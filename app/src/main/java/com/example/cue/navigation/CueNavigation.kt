@@ -21,6 +21,8 @@ import com.example.cue.chat.UnifiedChatScreen
 import com.example.cue.debug.DebugScreen
 import com.example.cue.settings.SettingsScreen
 import com.example.cue.settings.apikeys.ApiKeysScreen
+import com.example.cue.ui.session.SessionChatScreen
+import com.example.cue.ui.session.SessionListScreen
 
 object Routes {
     const val LOGIN = "login"
@@ -31,7 +33,10 @@ object Routes {
     const val API_KEYS = "api_keys"
     const val ASSISTANT_CHAT = "assistant_chat/{assistantId}"
     const val DEBUG = "debug"
+    const val SESSION_LIST = "session_list"
+    const val SESSION_CHAT = "session_chat/{sessionId}"
     fun assistantChat(assistantId: String) = "assistant_chat/$assistantId"
+    fun sessionChat(sessionId: String) = "session_chat/$sessionId"
 }
 
 @Composable
@@ -122,5 +127,30 @@ fun NavGraphBuilder.mainGraph(navController: NavController) {
                 navController.popBackStack()
             },
         )
+    }
+    composable(Routes.SESSION_LIST) {
+        SessionListScreen(
+            onNavigateToChat = { session ->
+                navController.navigate(Routes.sessionChat(session.id))
+            },
+        )
+    }
+    composable(
+        route = Routes.SESSION_CHAT,
+        arguments = listOf(navArgument("sessionId") { type = NavType.StringType }),
+    ) { backStackEntry ->
+        val sessionId = backStackEntry.arguments?.getString("sessionId") ?: return@composable
+        // TODO: Get session by ID from viewModel or repository
+        // For now, create a mock session
+        val mockSession = com.example.cue.ui.session.CLISession(
+            id = sessionId,
+            displayName = "Mock Session",
+            cwd = "/Users",
+            createdAt = java.util.Date(),
+            isActive = true,
+            targetClientId = "mock-client",
+            targetClientName = "Mock Client",
+        )
+        SessionChatScreen(session = mockSession)
     }
 }

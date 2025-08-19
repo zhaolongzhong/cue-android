@@ -51,7 +51,8 @@ class ClientStatusService @Inject constructor(
     }
 
     private fun handleClientStatusMessage(message: EventMessage) {
-        val payload = message.payload?.payload
+        val messagePayload = message.payload as? com.example.cue.network.websocket.MessagePayload
+        val payload = messagePayload?.payload
         Log.d(TAG, "Receive client status: $payload")
         if (payload != null) {
             val runnerId = (payload["runner_id"] as? String)

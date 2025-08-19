@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.DrawerState
@@ -105,6 +106,17 @@ fun CueDrawer(
                     }
                 }
             }
+
+            DrawerItem(
+                icon = Icons.Default.Chat,
+                label = "Sessions",
+                selected = currentRoute == Routes.SESSION_LIST || currentRoute?.startsWith("session_chat") == true,
+                route = Routes.SESSION_LIST,
+                drawerState = drawerState,
+                scope = scope,
+                onNavigate = onNavigate,
+                modifier = Modifier.padding(vertical = 4.dp),
+            )
 
             DrawerItem(
                 icon = Icons.Default.Settings,

@@ -13,3 +13,7 @@
 
 - DO NOT add code comments unless logic is exceptionally complex
 - No code comments unless absolutely necessary
+
+## Build and Test
+- Don't use screenshot to test unless you are specifically asked to use.
+- After you finish code update, ensure app builds successfully

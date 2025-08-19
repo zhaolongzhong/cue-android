@@ -42,6 +42,7 @@ import com.example.cue.debug.DebugViewModel
 import com.example.cue.debug.Provider
 import com.example.cue.navigation.CueNavigation
 import com.example.cue.navigation.Routes
+import com.example.cue.ui.components.BottomNavBar
 import com.example.cue.ui.components.CueDrawer
 import com.example.cue.ui.theme.CueTheme
 import com.example.cue.ui.theme.ThemeController
@@ -128,6 +129,8 @@ class MainActivity : ComponentActivity() {
                                     Routes.ASSISTANTS,
                                     Routes.SETTINGS,
                                     Routes.ASSISTANT_CHAT,
+                                    Routes.SESSION_LIST,
+                                    Routes.SESSION_CHAT,
                                 )
                             ) {
                                 TopAppBar(
@@ -136,6 +139,8 @@ class MainActivity : ComponentActivity() {
                                             when {
                                                 currentRoute.startsWith(Routes.ASSISTANT_CHAT) -> "Chat"
                                                 currentRoute == Routes.CHAT -> "${debugUiState.currentProvider.displayName} Chat"
+                                                currentRoute == Routes.SESSION_LIST -> "Sessions"
+                                                currentRoute.startsWith("session_chat") -> "Session Chat"
                                                 else -> currentRoute.replaceFirstChar { it.uppercase() }
                                             },
                                         )
@@ -155,6 +160,11 @@ class MainActivity : ComponentActivity() {
                                         }
                                     },
                                 )
+                            }
+                        },
+                        bottomBar = {
+                            if (currentRoute in listOf(Routes.CHAT, Routes.SESSION_LIST)) {
+                                BottomNavBar(navController = navController)
                             }
                         },
                     ) { innerPadding ->
