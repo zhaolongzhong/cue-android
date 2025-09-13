@@ -1,0 +1,27 @@
+package ai.plusonelabs.openai
+
+import javax.inject.Inject
+import javax.inject.Singleton
+import ai.plusonelabs.utils.AppLog as Log
+
+private const val TAG = "OpenAIChatService"
+
+@Singleton
+class OpenAIChatService @Inject constructor(
+    private val openAIClient: OpenAIClient,
+) {
+    suspend fun sendMessage(message: String): String = try {
+        openAIClient.createCompletion(
+            prompt = message,
+            maxTokens = 1000,
+            temperature = 0.7,
+        )
+    } catch (e: Exception) {
+        Log.e(TAG, "Failed to send message", e)
+        throw ChatError.MessageSendFailed(e.message ?: "Failed to send message")
+    }
+}
+
+sealed class ChatError : Exception() {
+    data class MessageSendFailed(override val message: String) : ChatError()
+}

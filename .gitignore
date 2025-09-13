@@ -21,3 +21,11 @@ CONTEXT.md
 CLAUDE.md
 .cue/
 .claude/
+
+keystore.properties
+*.jks
+*.keystore
+build/outputs/
+
+# Kotlin compiler cache
+.kotlin/

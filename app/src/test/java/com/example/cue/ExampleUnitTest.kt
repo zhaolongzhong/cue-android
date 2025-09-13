@@ -1,4 +1,4 @@
-package com.example.cue
+package ai.plusonelabs
 
 import org.junit.Assert.assertEquals
 import org.junit.Test

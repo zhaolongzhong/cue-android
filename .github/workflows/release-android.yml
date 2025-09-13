@@ -1,0 +1,144 @@
+name: Release Android
+
+on:
+  push:
+    branches: ["release/android/*"]
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Release track'
+        required: true
+        default: 'internal'
+        type: choice
+        options:
+          - internal
+          - alpha
+          - beta
+          - production
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Determine new version
+        id: determine-version
+        run: |
+          # Extract version from branch name (e.g., release/android/1.0.0)
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          VERSION_NAME=$(echo $BRANCH_NAME | sed 's/release\/android\///')
+
+          # Get the latest version code from tags
+          LATEST_TAG=$(git tag -l "android-*" | sort -V | tail -n 1)
+          if [ -z "$LATEST_TAG" ]; then
+            VERSION_CODE=1
+          else
+            PREV_CODE=$(echo $LATEST_TAG | sed 's/android-[^-]*-//')
+            VERSION_CODE=$((PREV_CODE + 1))
+          fi
+
+          echo "version_name=$VERSION_NAME" >> $GITHUB_ENV
+          echo "version_code=$VERSION_CODE" >> $GITHUB_ENV
+          echo "new_tag=android-${VERSION_NAME}-${VERSION_CODE}" >> $GITHUB_ENV
+
+          echo "Version Name: $VERSION_NAME"
+          echo "Version Code: $VERSION_CODE"
+          echo "New Tag: android-${VERSION_NAME}-${VERSION_CODE}"
+
+      - name: Update version in build.gradle.kts
+        run: |
+          # Update versionCode and versionName in build.gradle.kts
+          sed -i "s/versionCode = [0-9]*/versionCode = ${{ env.version_code }}/" app/build.gradle.kts
+          sed -i "s/versionName = \"[^\"]*\"/versionName = \"${{ env.version_name }}\"/" app/build.gradle.kts
+
+          # Verify the update
+          echo "Updated version:"
+          grep -E "versionCode|versionName" app/build.gradle.kts
+
+      - name: Setup Keystore
+        run: |
+          # Create keystore.properties
+          echo "storeFile=../upload-keystore.jks" > keystore.properties
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" >> keystore.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> keystore.properties
+          echo "keyAlias=upload-keystore" >> keystore.properties
+
+          # Decode and save keystore
+          echo "${{ secrets.BASE64_ENCODED_KEYSTORE }}" | base64 --decode > upload-keystore.jks
+
+      - name: Setup API Keys
+        run: |
+          # Create local.properties with API keys
+          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> local.properties
+          echo "ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}" >> local.properties
+          echo "API_BASE_URL=${{ secrets.API_BASE_URL }}" >> local.properties
+          echo "WEBSOCKET_BASE_URL=${{ secrets.WEBSOCKET_BASE_URL }}" >> local.properties
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Release APK
+        run: ./gradlew assembleRelease
+
+      - name: Build Release Bundle (AAB)
+        run: ./gradlew bundleRelease
+
+      - name: Upload APK as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Upload Bundle as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle
+          path: app/build/outputs/bundle/release/app-release.aab
+
+      - name: Deploy to Google Play Store
+        if: github.event_name == 'push' || github.event.inputs.track != ''
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: ai.plusonelabs.app.dev
+          releaseFiles: app/build/outputs/bundle/release/app-release.aab
+          track: ${{ github.event.inputs.track || 'internal' }}
+          inAppUpdatePriority: 3
+          status: draft
+          whatsNewDirectory: whatsnew/  # Optional: directory with release notes
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.new_tag }}
+          release_name: Release ${{ env.version_name }} (${{ env.version_code }})
+          body: |
+            ## CUE Android Release ${{ env.version_name }}
+
+            Build: ${{ env.version_code }}
+            Track: ${{ github.event.inputs.track || 'internal' }}
+
+            ### Downloads
+            - APK and AAB files are available as artifacts in this workflow run
+          draft: false
+          prerelease: ${{ github.event.inputs.track == 'alpha' || github.event.inputs.track == 'beta' }}
+
+      - name: Push new tag
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git tag ${{ env.new_tag }}
+          git push origin ${{ env.new_tag }}
