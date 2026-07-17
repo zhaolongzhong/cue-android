@@ -29,3 +29,11 @@ build/outputs/
 
 # Kotlin compiler cache
 .kotlin/
+
+# Workspace-local agent state and scratch files
+.skills/
+.memory/
+.tmp*/
+tmp/
+todos/
+SKILLS.md
