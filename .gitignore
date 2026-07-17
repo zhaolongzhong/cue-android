@@ -33,7 +33,7 @@ build/outputs/
 # Workspace-local agent state and scratch files
 .skills/
 .memory/
-.tmp*/
+.tmp/
 tmp/
 todos/
 SKILLS.md
